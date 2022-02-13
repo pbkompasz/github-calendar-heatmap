@@ -35,7 +35,7 @@
 		},
 		setup(props) {
 
-			const round      = ref(props.initialRound || 2),
+			const round      = ref(  props.initialRound !== undefined ? props.initialRound : 2),
 				  isDarkMode = useDarkMode();
 
 			return {

@@ -103,11 +103,11 @@ export default {
 <calendar-heatmap :round="0" .../>
 ```
 
-#### Example (:round="0")
+#### Example `:round="0"`
 
 <Demo :initialRound="0"/>
 
-#### Example (:round="5")
+#### Example `:round="5"`
 
 <Demo :initialRound="5"/>
 
