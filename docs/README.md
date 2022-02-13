@@ -76,7 +76,7 @@ export default {
   Array of objects with `date` and `count` keys. `date` values can be a date parseable string, a millisecond timestamp, or a Date object. `count` value should
   be a number.
 
-```html
+```html:no-line-numbers
 <calendar-heatmap :values="[{ date: '2018-9-22', count: 6 }, ...]" .../>
 ```
 
@@ -88,7 +88,7 @@ export default {
 
   Can be a date parseable string, a millisecond timestamp, or a Date object. The calendar will start automatically one year before this date.
 
-```html
+```html:no-line-numbers
 <calendar-heatmap :end-date="2018-9-22" .../>
 ```
 
@@ -99,7 +99,7 @@ export default {
 
   Number to create rounded corners or cirlces in heatmap. `0` by default.
 
-```html
+```html:no-line-numbers
 <calendar-heatmap :round="0" .../>
 ```
 
@@ -118,7 +118,7 @@ export default {
   Boolean to toggle default color range between dark and light mode.
   Toggle page between light and dark mode to see in action.
 
-```html
+```html:no-line-numbers
 <calendar-heatmap dark-mode .../>
 ```
 
@@ -135,7 +135,7 @@ export default {
     - The color at `rangeColor[1]` will always represent the values for a `count: 0`
     - The others are automatically distributed over the maximum value of count, unless you specify `max` props.
 
-```html
+```html:no-line-numbers
 <calendar-heatmap :range-color="['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39']" .../>
 ```
 
@@ -150,7 +150,7 @@ export default {
 
   Any number which should be the max color.
 
-```html
+```html:no-line-numbers
 <calendar-heatmap :max="10" .../>
 ```
 
@@ -161,7 +161,7 @@ export default {
 
   Tooltip text to display on days without data. null by default (shows no tooltip at all).
 
-```html
+```html:no-line-numbers
 <calendar-heatmap :no-data-text="no data for this day" .../>
 ```
 
@@ -172,7 +172,7 @@ export default {
 
   Boolean for enable/disable tooltip on square hover. true by default.
 
-```html
+```html:no-line-numbers
 <calendar-heatmap :tooltip="false" .../>
 ```
 
@@ -183,7 +183,7 @@ export default {
 
   String representing heatmap's unit of measure. Value is "contributions" by default.
 
-```html
+```html:no-line-numbers
 <calendar-heatmap tooltip-unit="stars" .../>
 ```
 
@@ -194,7 +194,7 @@ export default {
 
   A method to have full control about tooltip content.
 
-```html
+```html:no-line-numbers
 <calendar-heatmap :tooltip-formatter="(v) => v.count" .../>
 ```
 
@@ -205,7 +205,7 @@ export default {
 
   Boolean to switch to vertical mode. false by default.
 
-```html
+```html:no-line-numbers
 <calendar-heatmap vertical .../>
 ```
 
