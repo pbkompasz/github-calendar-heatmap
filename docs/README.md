@@ -6,6 +6,8 @@ footer: MIT Licensed | Copyright © 2021-present razorness
 <Demo :initial-round="2"/>
 <Links/>
 
+A lightweight calendar heatmap Vuejs component built on SVG, inspired by github's contribution calendar graph. With vertical mode, tooltip powered by [Tippy.js](https://github.com/atomiks/tippyjs).
+
 ## Installation
 
 <CodeGroup>
@@ -59,7 +61,8 @@ export default {
 }
 ```
 
-::: warning A css file is included when importing the package. You may have to setup your bundler to embed the css in your page.
+::: warning 
+  A css file is included when importing the package. You may have to setup your bundler to embed the css in your page.
 :::
 
 ## Usage
