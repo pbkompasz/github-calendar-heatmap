@@ -57,7 +57,17 @@
             :end-date="endDate" 
             :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
             :vertical="orientation === 'vertical'" :no-data-text="false"
-        />
+        >
+            <template #months>
+                <div></div>
+            </template>
+            <template #days>
+                <div></div>
+            </template>
+            <template #legend>
+                <div></div>
+            </template>
+        </calendar-heatmap>
 		<br>
 		<h4>
             Some
@@ -135,7 +145,9 @@
 
 <script lang="ts">
 	import { defineComponent } from 'vue';
+    // @ts-ignore
 	import Vue3CalendarHeatmap from '@/components/CalendarHeatmap.vue';
+    // @ts-ignore
 	import CalendarHeatmap from '@/components/CalendarHeatmap.vue';
 	import { data } from './data';
 

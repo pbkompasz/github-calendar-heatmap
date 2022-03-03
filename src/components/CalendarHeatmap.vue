@@ -1,39 +1,49 @@
 <template>
 	<div :class="{'vch__container': true, 'dark-mode': darkMode}">
 		<svg class="vch__wrapper" ref="svg" :viewBox="viewbox">
+
+            <!-- MONTHS -->
 			<g class="vch__months__labels__wrapper" :transform="monthsLabelWrapperTransform">
-				<text
-					class="vch__month__label"
-					v-for="(month, index) in heatmap.firstFullWeekOfMonths"
-					:key="index"
-					:x="getMonthLabelPosition(month).x"
-					:y="getMonthLabelPosition(month).y"
-				>
-					{{ lo.months[ month.value ] }}
-				</text>
+                <slot name="months">
+                <!-- Months that appear on the left side of the calendar -->
+                    <text
+                        class="vch__month__label"
+                        v-for="(month, index) in heatmap.firstFullWeekOfMonths"
+                        :key="index"
+                        :x="getMonthLabelPosition(month).x"
+                        :y="getMonthLabelPosition(month).y"
+                    >
+                        {{ lo.months[ month.value ] }}
+                    </text>
+                </slot>
 			</g>
 
+            <!-- DAYS -->
 			<g class="vch__days__labels__wrapper" :transform="daysLabelWrapperTransform">
-				<text class="vch__day__label"
-					  :x="vertical ? SQUARE_SIZE : 0"
-					  :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 20"
-				>
-					{{ lo.days[ 1 ] }}
-				</text>
-				<text class="vch__day__label"
-					  :x="vertical ? SQUARE_SIZE * 3 : 0"
-					  :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 44"
-				>
-					{{ lo.days[ 3 ] }}
-				</text>
-				<text class="vch__day__label"
-					  :x="vertical ? SQUARE_SIZE * 5 : 0"
-					  :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 69"
-				>
-					{{ lo.days[ 5 ] }}
-				</text>
+                <!-- Days that appear on the left side of the calendar -->
+                <slot name="days">
+                    <text class="vch__day__label"
+                        :x="vertical ? SQUARE_SIZE : 0"
+                        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 20"
+                    >
+                        {{ lo.days[ 1 ] }}
+                    </text>
+                    <text class="vch__day__label"
+                        :x="vertical ? SQUARE_SIZE * 3 : 0"
+                        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 44"
+                    >
+                        {{ lo.days[ 3 ] }}
+                    </text>
+                    <text class="vch__day__label"
+                        :x="vertical ? SQUARE_SIZE * 5 : 0"
+                        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 69"
+                    >
+                        {{ lo.days[ 5 ] }}
+                    </text>
+                </slot>
 			</g>
 
+            <!-- VERTICAL CALENDAR -->
 			<g v-if="vertical" class="vch__legend__wrapper" :transform="legendWrapperTransform">
 				<text :x="SQUARE_SIZE * 1.25" y="8">{{ lo.less }}</text>
 				<rect
@@ -55,6 +65,7 @@
 				</text>
 			</g>
 
+            <!-- MAIN CALENDAR -->
 			<g class="vch__year__wrapper" :transform="yearWrapperTransform">
 				<g class="vch__month__wrapper"
 				   v-for="(week, weekIndex) in heatmap.calendar"
@@ -77,13 +88,12 @@
 				</g>
 			</g>
 		</svg>
+
+        <!-- LEGEND -->
 		<div class="vch__legend">
 			<slot name="legend">
-				<div class="vch__legend-left">
-					<slot name="vch__legend-left"></slot>
-				</div>
 				<div class="vch__legend-right">
-					<slot name="legend-right">
+					<slot name="legend">
 						<div class="vch__legend">
 							<div>{{ lo.less }}</div>
 							<svg v-if="!vertical" class="vch__external-legend-wrapper" :viewBox="legendViewbox" :height="SQUARE_SIZE - SQUARE_BORDER_SIZE">
@@ -111,6 +121,7 @@
 
 <script lang="ts">
 	import { defineComponent, nextTick, onBeforeUnmount, onMounted, PropType, ref, toRef, toRefs, watch } from 'vue';
+    // @ts-ignore
 	import { CalendarItem, Heatmap, Locale, Month, TooltipFormatter, Value } from '@/components/Heatmap';
 	import tippy, { createSingleton, CreateSingletonInstance, Instance } from 'tippy.js';
 	import 'tippy.js/dist/tippy.css';
@@ -158,7 +169,16 @@
 				type   : Number,
 				default: 0
 			},
-			darkMode        : Boolean
+			darkMode        : Boolean,
+            legendDirection: {
+                type: String,
+                default: 'right',
+                isIn: ['right', 'left', 'top', 'bottom', ]
+            },
+            weekDaysNo: {
+                type: Number,
+                default: 3,
+            }
 		},
 		emits: [ 'dayClick' ],
 		setup(props) {
@@ -190,7 +210,7 @@
 			let tippyInstances: Instance[],
 				tippySingleton: CreateSingletonInstance;
 
-			function initTippy() {
+			const initTippy = () => {
 				tippyInstances = tippy(Array.from(svg.value!.querySelectorAll('.vch__day__square[data-tippy-content]')));
 				if (tippySingleton) {
 					tippySingleton.setInstances(tippyInstances);
@@ -202,7 +222,7 @@
 				}
 			}
 
-			function tooltipOptions(day: CalendarItem) {
+			const tooltipOptions = (day: CalendarItem) => {
 				if (props.tooltip) {
 					if (day.count !== undefined) {
 						if (props.tooltipFormatter) {
@@ -218,21 +238,21 @@
 				return undefined;
 			}
 
-			function getWeekPosition(index: number) {
+			const getWeekPosition = (index: number) => {
 				if (props.vertical) {
 					return `translate(0, ${(SQUARE_SIZE * heatmap.value.weekCount) - ((index + 1) * SQUARE_SIZE)})`;
 				}
 				return `translate(${index * SQUARE_SIZE}, 0)`;
 			}
 
-			function getDayPosition(index: number) {
+			const getDayPosition = (index: number) => {
 				if (props.vertical) {
 					return `translate(${index * SQUARE_SIZE}, 0)`;
 				}
 				return `translate(0, ${index * SQUARE_SIZE})`;
 			}
 
-			function getMonthLabelPosition(month: Month) {
+			const getMonthLabelPosition = (month: Month) => {
 				if (props.vertical) {
 					return { x: 3, y: (SQUARE_SIZE * heatmap.value.weekCount) - (SQUARE_SIZE * (month.index)) - (SQUARE_SIZE / 4) };
 				}
@@ -277,6 +297,7 @@
 			);
 
 			onMounted(initTippy);
+
 			onBeforeUnmount(() => {
 				tippySingleton?.destroy();
 				tippyInstances?.map(i => i.destroy());
@@ -299,6 +320,7 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
+            flex-direction: row-reverse;
 		}
 
 		.vch__external-legend-wrapper {
