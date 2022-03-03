@@ -54,9 +54,11 @@
         </h4>
 		<calendar-heatmap 
             :values="[]" 
-            :end-date="endDate" 
+            :end-date="new Date()" 
             :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
-            :vertical="orientation === 'vertical'" :no-data-text="false"
+			:vertical="false"
+            :darkMode="true"
+            legendDirection="right"
         >
             <template #months>
                 <div></div>
@@ -65,7 +67,7 @@
                 <div></div>
             </template>
             <template #legend>
-                <div></div>
+                <div>asd</div>
             </template>
         </calendar-heatmap>
 		<br>
@@ -76,7 +78,6 @@
 			:values="values"
 			:end-date="endDate"
 			:style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
-			:vertical="orientation === 'vertical'"
 			no-data-text="NOTHING"
 		/>
 		<br>

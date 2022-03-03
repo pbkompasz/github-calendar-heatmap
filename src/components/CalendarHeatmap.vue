@@ -82,7 +82,7 @@
 							  :height="SQUARE_SIZE - SQUARE_BORDER_SIZE"
 							  :style="{ fill: curRangeColor[day.colorIndex] }"
 							  :data-tippy-content="tooltipOptions(day)"
-							  @click="$emit('dayClick', day)"
+							  @click="emitEvent(day)"
 						/>
 					</template>
 				</g>
@@ -90,31 +90,27 @@
 		</svg>
 
         <!-- LEGEND -->
-		<div class="vch__legend">
-			<slot name="legend">
-				<div class="vch__legend-right">
-					<slot name="legend">
-						<div class="vch__legend">
-							<div>{{ lo.less }}</div>
-							<svg v-if="!vertical" class="vch__external-legend-wrapper" :viewBox="legendViewbox" :height="SQUARE_SIZE - SQUARE_BORDER_SIZE">
-								<g class="vch__legend__wrapper">
-									<rect
-										v-for="(color, index) in curRangeColor"
-										:key="index"
-										:rx="round"
-										:ry="round"
-										:style="{ fill: color }"
-										:width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
-										:height="SQUARE_SIZE - SQUARE_BORDER_SIZE"
-										:x="SQUARE_SIZE * index"
-									/>
-								</g>
-							</svg>
-							<div>{{ lo.more }}</div>
-						</div>
-					</slot>
-				</div>
-			</slot>
+		<div :class="`vch__legend legend-${legendDirection}`">
+            <slot name="legend">
+                <div class="legend">
+                    <div>{{ lo.less }}</div>
+                    <svg v-if="!vertical" class="vch__external-legend-wrapper" :viewBox="legendViewbox" :height="SQUARE_SIZE - SQUARE_BORDER_SIZE">
+                        <g class="vch__legend__wrapper">
+                            <rect
+                                v-for="(color, index) in curRangeColor"
+                                :key="index"
+                                :rx="round"
+                                :ry="round"
+                                :style="{ fill: color }"
+                                :width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
+                                :height="SQUARE_SIZE - SQUARE_BORDER_SIZE"
+                                :x="SQUARE_SIZE * index"
+                            />
+                        </g>
+                    </svg>
+                    <div>{{ lo.more }}</div>
+                </div>
+            </slot>
 		</div>
 	</div>
 </template>
@@ -131,7 +127,8 @@
 		name : 'CalendarHeatmap',
 		props: {
 			endDate         : {
-				required: true
+                type: Date,
+				required: true,
 			},
 			max             : {
 				type: Number
@@ -173,15 +170,24 @@
             legendDirection: {
                 type: String,
                 default: 'right',
-                isIn: ['right', 'left', 'top', 'bottom', ]
+                isIn: ['right', 'left', 'top', 'bottom', ],
+                // validator: (value: String) => {
+                //    return (vertical && value === 'top' || value === 'bottom') && (!vertical && value === 'left' || value === 'right') 
+                // }
             },
+            // Number of week days shown on the left side of the calendar
             weekDaysNo: {
                 type: Number,
                 default: 3,
+            },
+            // No hover effect, no tooltip, no click event emit
+            noInteract: {
+                type: Boolean,
+                default: false,
             }
 		},
 		emits: [ 'dayClick' ],
-		setup(props) {
+		setup(props, { emit }) {
 
 			const SQUARE_BORDER_SIZE          = Heatmap.SQUARE_SIZE / 5,
 				  SQUARE_SIZE                 = Heatmap.SQUARE_SIZE + SQUARE_BORDER_SIZE,
@@ -205,7 +211,8 @@
 				  lo                          = ref<Locale>({} as any),
 				  rangeColor                  = ref<string[]>(props.rangeColor || (props.darkMode ? Heatmap.DEFAULT_RANGE_COLOR_DARK : Heatmap.DEFAULT_RANGE_COLOR_LIGHT));
 
-			const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale } = toRefs(props);
+			const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirection } = toRefs(props);
+
 
 			let tippyInstances: Instance[],
 				tippySingleton: CreateSingletonInstance;
@@ -296,18 +303,34 @@
 				}
 			);
 
-			onMounted(initTippy);
+			onMounted(() => {
+                initTippy()
+                // if (vertical.value) {
+                //     legendDirection.value = 'bottom'
+                // }
+            });
+             
+            // watch(vertical, val => {
+            //     if (val) {
+            //         legendDirection.value = 'bottom'
+            //     }
+            // })
 
 			onBeforeUnmount(() => {
 				tippySingleton?.destroy();
 				tippyInstances?.map(i => i.destroy());
 			});
 
+            const emitEvent = (day: String | Date) => {
+                if (!toRef(props, 'noInteract'))
+                    emit('dayClick', day)
+            }
+
 			return {
 				SQUARE_BORDER_SIZE, SQUARE_SIZE, LEFT_SECTION_WIDTH, RIGHT_SECTION_WIDTH, TOP_SECTION_HEIGHT, BOTTOM_SECTION_HEIGHT,
 				svg, heatmap, now, width, height, viewbox, daysLabelWrapperTransform, monthsLabelWrapperTransform, yearWrapperTransform, legendWrapperTransform,
-				lo, legendViewbox, curRangeColor: rangeColor,
-				tooltipOptions, getWeekPosition, getDayPosition, getMonthLabelPosition
+				lo, legendViewbox, curRangeColor: rangeColor, legendDirection,
+				tooltipOptions, getWeekPosition, getDayPosition, getMonthLabelPosition, emitEvent, 
 			};
 		}
 	});
@@ -316,11 +339,28 @@
 <style lang="scss">
 
 	.vch__container {
+        .legend {
+            display: flex;
+			justify-content: space-between;
+			align-items: center;
+        }
 		.vch__legend {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-            flex-direction: row-reverse;
+
+            &.legend-left {
+                flex-direction: row;
+            }
+            &.legend-right {
+                flex-direction: row-reverse;
+            }
+            &.legend-top {
+                flex-direction: column;
+            }
+            &.legend-bottom {
+                flex-direction: column-reverse;
+            }
 		}
 
 		.vch__external-legend-wrapper {
