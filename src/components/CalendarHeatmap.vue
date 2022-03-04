@@ -1,5 +1,6 @@
 <template>
 	<div :class="{'vch__container': true, 'dark-mode': darkMode}">
+        {{ viewbox }}
 		<svg class="vch__wrapper" ref="svg" :viewBox="viewbox">
 
             <!-- MONTHS -->
@@ -128,7 +129,8 @@
 		props: {
 			endDate         : {
                 type: Date,
-				required: true,
+				// required: true,
+                default: new Date(),
 			},
 			max             : {
 				type: Number

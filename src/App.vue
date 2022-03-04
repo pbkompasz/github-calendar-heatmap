@@ -54,10 +54,10 @@
         </h4>
 		<calendar-heatmap 
             :values="[]" 
-            :end-date="new Date()" 
             :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
-			:vertical="false"
+			:vertical="true"
             :darkMode="true"
+            style="max-width: 150px"
             legendDirection="right"
         >
             <template #months>
