@@ -1,6 +1,7 @@
 <template>
 	<div :class="{'vch__container': true, 'dark-mode': darkMode}">
         {{ viewbox }}
+        {{ legendDirectionReverse }}
 		<svg class="vch__wrapper" ref="svg" :viewBox="viewbox">
 
             <!-- MONTHS -->
@@ -45,7 +46,10 @@
 			</g>
 
             <!-- VERTICAL CALENDAR -->
-			<g v-if="vertical" class="vch__legend__wrapper" :transform="legendWrapperTransform">
+			<g v-if="vertical" 
+                class="vch__legend__wrapper legend legend-bottom"
+                :transform="legendWrapperTransform"
+            >
 				<text :x="SQUARE_SIZE * 1.25" y="8">{{ lo.less }}</text>
 				<rect
 					v-for="(color, index) in curRangeColor"
@@ -91,7 +95,7 @@
 		</svg>
 
         <!-- LEGEND -->
-		<div :class="`vch__legend legend-${legendDirection}`">
+		<div :class="`vch__legend legend-${(legendDirectionReverse ? (vertical ? 'bottom' : 'left' ) : (vertical ? 'top': 'right'))}`">
             <slot name="legend">
                 <div class="legend">
                     <div>{{ lo.less }}</div>
@@ -127,17 +131,20 @@
 	export default /*#__PURE__*/defineComponent({
 		name : 'CalendarHeatmap',
 		props: {
+            // Calendar end date
 			endDate         : {
                 type: Date,
 				// required: true,
                 default: new Date(),
 			},
+            // DUNNO
 			max             : {
 				type: Number
 			},
 			rangeColor      : {
 				type: Array as PropType<string[]>
 			},
+            // Main values
 			values          : {
 				type    : Array as PropType<Value[]>,
 				required: true
@@ -145,6 +152,7 @@
 			locale          : {
 				type: Object as PropType<Partial<Locale>>
 			},
+            // Show tooltip
 			tooltip         : {
 				type   : Boolean,
 				default: true
@@ -156,23 +164,34 @@
 			tooltipFormatter: {
 				type: Function as PropType<TooltipFormatter>
 			},
+            // Calendar orientation
 			vertical        : {
 				type   : Boolean,
 				default: false
 			},
+            // Tooltip text on date with no data
 			noDataText      : {
 				type   : [ Boolean, String ],
 				default: null
 			},
+            // Show no tooltip for empty dates
+            noDataTooltip: {
+                type: Boolean,
+                default: false,
+            },
+            // Rounded corner for each date
 			round           : {
 				type   : Number,
-				default: 0
+				default: 0,
+                validator: (val: Number) => {
+                    return (val >= 0 && val <= 5)
+                },
 			},
 			darkMode        : Boolean,
-            legendDirection: {
-                type: String,
-                default: 'right',
-                isIn: ['right', 'left', 'top', 'bottom', ],
+            // default is right if horizontal, top if vertical
+            legendDirectionReverse: {
+                type: Boolean,
+                default: false,
                 // validator: (value: String) => {
                 //    return (vertical && value === 'top' || value === 'bottom') && (!vertical && value === 'left' || value === 'right') 
                 // }
@@ -213,7 +232,7 @@
 				  lo                          = ref<Locale>({} as any),
 				  rangeColor                  = ref<string[]>(props.rangeColor || (props.darkMode ? Heatmap.DEFAULT_RANGE_COLOR_DARK : Heatmap.DEFAULT_RANGE_COLOR_LIGHT));
 
-			const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirection } = toRefs(props);
+			const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse } = toRefs(props);
 
 
 			let tippyInstances: Instance[],
@@ -331,7 +350,7 @@
 			return {
 				SQUARE_BORDER_SIZE, SQUARE_SIZE, LEFT_SECTION_WIDTH, RIGHT_SECTION_WIDTH, TOP_SECTION_HEIGHT, BOTTOM_SECTION_HEIGHT,
 				svg, heatmap, now, width, height, viewbox, daysLabelWrapperTransform, monthsLabelWrapperTransform, yearWrapperTransform, legendWrapperTransform,
-				lo, legendViewbox, curRangeColor: rangeColor, legendDirection,
+				lo, legendViewbox, curRangeColor: rangeColor, legendDirectionReverse,
 				tooltipOptions, getWeekPosition, getDayPosition, getMonthLabelPosition, emitEvent, 
 			};
 		}

@@ -55,10 +55,9 @@
 		<calendar-heatmap 
             :values="[]" 
             :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
-			:vertical="true"
+			:vertical="false"
             :darkMode="true"
-            style="max-width: 150px"
-            legendDirection="right"
+            :legendDirectionReverse="true"
         >
             <template #months>
                 <div></div>
@@ -67,7 +66,7 @@
                 <div></div>
             </template>
             <template #legend>
-                <div>asd</div>
+                <!-- <div>asd</div> -->
             </template>
         </calendar-heatmap>
 		<br>
