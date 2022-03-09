@@ -56,16 +56,22 @@
             :values="[]" 
             :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
 			:vertical="false"
-            :darkMode="true"
-            :legendDirectionReverse="true"
+            :darkMode="false"
+            :legendDirectionReverse="false"
         >
             <template #months>
-                <div></div>
+                <!-- <div></div> -->
             </template>
             <template #days>
-                <div></div>
+                <!-- <div></div> -->
             </template>
-            <template #legend>
+            <template #legend-text-less>
+                <!-- <div>asd</div> -->
+            </template>
+            <template #legend-text-more>
+                <!-- <div>asd</div> -->
+            </template>
+            <template #legend-range>
                 <!-- <div>asd</div> -->
             </template>
         </calendar-heatmap>

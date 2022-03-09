@@ -1,7 +1,5 @@
 <template>
 	<div :class="{'vch__container': true, 'dark-mode': darkMode}">
-        {{ viewbox }}
-        {{ legendDirectionReverse }}
 		<svg class="vch__wrapper" ref="svg" :viewBox="viewbox">
 
             <!-- MONTHS -->
@@ -24,24 +22,18 @@
 			<g class="vch__days__labels__wrapper" :transform="daysLabelWrapperTransform">
                 <!-- Days that appear on the left side of the calendar -->
                 <slot name="days">
-                    <text class="vch__day__label"
-                        :x="vertical ? SQUARE_SIZE : 0"
-                        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 20"
+                    <template
+                        v-for="i in daysArray"
+                        :key="i"
                     >
-                        {{ lo.days[ 1 ] }}
-                    </text>
-                    <text class="vch__day__label"
-                        :x="vertical ? SQUARE_SIZE * 3 : 0"
-                        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 44"
-                    >
-                        {{ lo.days[ 3 ] }}
-                    </text>
-                    <text class="vch__day__label"
-                        :x="vertical ? SQUARE_SIZE * 5 : 0"
-                        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : 69"
-                    >
-                        {{ lo.days[ 5 ] }}
-                    </text>
+                        <text
+                            class="vch__day__label"
+                            :x="vertical ? SQUARE_SIZE * i : 0"
+                            :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : (8+i*SQUARE_SIZE)"
+                        >
+                            {{ lo.days[i] }}
+                        </text>
+                    </template>
                 </slot>
 			</g>
 
@@ -95,10 +87,16 @@
 		</svg>
 
         <!-- LEGEND -->
-		<div :class="`vch__legend legend-${(legendDirectionReverse ? (vertical ? 'bottom' : 'left' ) : (vertical ? 'top': 'right'))}`">
-            <slot name="legend">
-                <div class="legend">
-                    <div>{{ lo.less }}</div>
+		<div 
+            :class="`vch__legend legend-${(legendDirectionReverse ? (vertical ? 'bottom' : 'left' ) : (vertical ? 'top': 'right'))}`"
+        >
+                <div 
+                    class="legend"
+                >
+                    <slot name="legend-text-less">
+                        <div>{{ lo.less }}</div>
+                    </slot>
+                    <slot name="legend-range">
                     <svg v-if="!vertical" class="vch__external-legend-wrapper" :viewBox="legendViewbox" :height="SQUARE_SIZE - SQUARE_BORDER_SIZE">
                         <g class="vch__legend__wrapper">
                             <rect
@@ -113,15 +111,17 @@
                             />
                         </g>
                     </svg>
-                    <div>{{ lo.more }}</div>
+                    </slot>
+                    <slot name="legend-text-more">
+                        <div>{{ lo.more }}</div>
+                    </slot>
                 </div>
-            </slot>
 		</div>
 	</div>
 </template>
 
 <script lang="ts">
-	import { defineComponent, nextTick, onBeforeUnmount, onMounted, PropType, ref, toRef, toRefs, watch } from 'vue';
+	import { defineComponent, nextTick, onBeforeUnmount, onMounted, PropType, ref, toRef, toRefs, watch, computed } from 'vue';
     // @ts-ignore
 	import { CalendarItem, Heatmap, Locale, Month, TooltipFormatter, Value } from '@/components/Heatmap';
 	import tippy, { createSingleton, CreateSingletonInstance, Instance } from 'tippy.js';
@@ -221,6 +221,7 @@
 				  svg                         = ref<null | SVGElement>(null),
 				  now                         = ref(new Date()),
 				  heatmap                     = ref(new Heatmap(props.endDate as Date, props.values, props.max)),
+                  dayPositions                = ref([8, 20, 32, 44, 56, 68, 80]),
 
 				  width                       = ref(0),
 				  height                      = ref(0),
@@ -232,7 +233,7 @@
 				  lo                          = ref<Locale>({} as any),
 				  rangeColor                  = ref<string[]>(props.rangeColor || (props.darkMode ? Heatmap.DEFAULT_RANGE_COLOR_DARK : Heatmap.DEFAULT_RANGE_COLOR_LIGHT));
 
-			const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse } = toRefs(props);
+			const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse, weekDaysNo } = toRefs(props);
 
 
 			let tippyInstances: Instance[],
@@ -250,6 +251,7 @@
 				}
 			}
 
+            // TODO change to prop
 			const tooltipOptions = (day: CalendarItem) => {
 				if (props.tooltip) {
 					if (day.count !== undefined) {
@@ -326,21 +328,33 @@
 
 			onMounted(() => {
                 initTippy()
-                // if (vertical.value) {
-                //     legendDirection.value = 'bottom'
-                // }
             });
              
-            // watch(vertical, val => {
-            //     if (val) {
-            //         legendDirection.value = 'bottom'
-            //     }
-            // })
-
 			onBeforeUnmount(() => {
 				tippySingleton?.destroy();
 				tippyInstances?.map(i => i.destroy());
 			});
+
+            const daysArray = computed(() => {
+                switch (weekDaysNo.value) {
+                    case 1:
+                        return [3] 
+                    case 2:
+                        return [2, 4] 
+                    case 3:
+                        return [1, 3, 5] 
+                    case 4:
+                        return [0, 2, 4, 6] 
+                    case 5:
+                        return [0, 1, 3, 5, 6] 
+                    case 6:
+                        return [0, 1, 2, 4, 5, 6] 
+                    case 7:
+                        return [0, 1, 2, 3, 4, 5, 6] 
+                    default:
+                        return [];
+                }
+            })
 
             const emitEvent = (day: String | Date) => {
                 if (!toRef(props, 'noInteract'))
@@ -349,8 +363,8 @@
 
 			return {
 				SQUARE_BORDER_SIZE, SQUARE_SIZE, LEFT_SECTION_WIDTH, RIGHT_SECTION_WIDTH, TOP_SECTION_HEIGHT, BOTTOM_SECTION_HEIGHT,
-				svg, heatmap, now, width, height, viewbox, daysLabelWrapperTransform, monthsLabelWrapperTransform, yearWrapperTransform, legendWrapperTransform,
-				lo, legendViewbox, curRangeColor: rangeColor, legendDirectionReverse,
+				svg, heatmap, dayPositions, now, width, height, viewbox, daysLabelWrapperTransform, monthsLabelWrapperTransform, yearWrapperTransform, legendWrapperTransform,
+				lo, legendViewbox, curRangeColor: rangeColor, legendDirectionReverse, daysArray,
 				tooltipOptions, getWeekPosition, getDayPosition, getMonthLabelPosition, emitEvent, 
 			};
 		}
