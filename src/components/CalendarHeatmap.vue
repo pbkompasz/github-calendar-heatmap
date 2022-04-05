@@ -1,47 +1,48 @@
 <template>
-	<div :class="{'vch__container': true, 'dark-mode': darkMode}">
+	<div 
+        :class="{'vch__container': true, 'dark-mode': darkMode, 'no-interact' : noInteract}"
+    >
 		<svg class="vch__wrapper" ref="svg" :viewBox="viewbox">
 
             <!-- MONTHS -->
 			<g class="vch__months__labels__wrapper" :transform="monthsLabelWrapperTransform">
-                <slot name="months">
                 <!-- Months that appear on the left side of the calendar -->
-                    <text
-                        class="vch__month__label"
-                        v-for="(month, index) in heatmap.firstFullWeekOfMonths"
-                        :key="index"
-                        :x="getMonthLabelPosition(month).x"
-                        :y="getMonthLabelPosition(month).y"
-                    >
-                        {{ lo.months[ month.value ] }}
-                    </text>
-                </slot>
+                <text
+                    class="vch__month__label"
+                    v-for="(month, index) in heatmap.firstFullWeekOfMonths"
+                    :key="index"
+                    :x="getMonthLabelPosition(month).x"
+                    :y="getMonthLabelPosition(month).y"
+                >
+                    {{ lo.months[ month.value ] }}
+                </text>
 			</g>
 
             <!-- DAYS -->
 			<g class="vch__days__labels__wrapper" :transform="daysLabelWrapperTransform">
                 <!-- Days that appear on the left side of the calendar -->
-                <slot name="days">
-                    <template
-                        v-for="i in daysArray"
-                        :key="i"
+                <template
+                    v-for="i in Array(7).keys()"
+                    :key="i"
+                >
+                    <text
+                        class="vch__day__label"
+                        :x="vertical ? SQUARE_SIZE * i : 0"
+                        :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : (8+i*SQUARE_SIZE)"
                     >
-                        <text
-                            class="vch__day__label"
-                            :x="vertical ? SQUARE_SIZE * i : 0"
-                            :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : (8+i*SQUARE_SIZE)"
+                        <slot
+                            :name="'day-' + i"
                         >
-                            {{ lo.days[i] }}
-                        </text>
-                    </template>
-                </slot>
+                            <template v-if="[1, 3, 5].includes(i)">
+                                {{ lo.days[i] }}
+                            </template>
+                        </slot>
+                    </text>
+                </template>
 			</g>
 
             <!-- VERTICAL CALENDAR -->
-			<g v-if="vertical" 
-                class="vch__legend__wrapper legend legend-bottom"
-                :transform="legendWrapperTransform"
-            >
+            <g v-if="vertical" class="vch__legend__wrapper" :transform="legendWrapperTransform">
 				<text :x="SQUARE_SIZE * 1.25" y="8">{{ lo.less }}</text>
 				<rect
 					v-for="(color, index) in curRangeColor"
@@ -88,10 +89,11 @@
 
         <!-- LEGEND -->
 		<div 
+            v-if="!vertical"
             :class="`vch__legend legend-${(legendDirectionReverse ? (vertical ? 'bottom' : 'left' ) : (vertical ? 'top': 'right'))}`"
         >
                 <div 
-                    class="legend"
+                    class="vch__legend"
                 >
                     <slot name="legend-text-less">
                         <div>{{ lo.less }}</div>
@@ -192,14 +194,6 @@
             legendDirectionReverse: {
                 type: Boolean,
                 default: false,
-                // validator: (value: String) => {
-                //    return (vertical && value === 'top' || value === 'bottom') && (!vertical && value === 'left' || value === 'right') 
-                // }
-            },
-            // Number of week days shown on the left side of the calendar
-            weekDaysNo: {
-                type: Number,
-                default: 3,
             },
             // No hover effect, no tooltip, no click event emit
             noInteract: {
@@ -208,7 +202,7 @@
             }
 		},
 		emits: [ 'dayClick' ],
-		setup(props, { emit }) {
+		setup(props, { emit, slots}) {
 
 			const SQUARE_BORDER_SIZE          = Heatmap.SQUARE_SIZE / 5,
 				  SQUARE_SIZE                 = Heatmap.SQUARE_SIZE + SQUARE_BORDER_SIZE,
@@ -233,7 +227,7 @@
 				  lo                          = ref<Locale>({} as any),
 				  rangeColor                  = ref<string[]>(props.rangeColor || (props.darkMode ? Heatmap.DEFAULT_RANGE_COLOR_DARK : Heatmap.DEFAULT_RANGE_COLOR_LIGHT));
 
-			const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse, weekDaysNo } = toRefs(props);
+			const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse } = toRefs(props);
 
 
 			let tippyInstances: Instance[],
@@ -251,17 +245,28 @@
 				}
 			}
 
-            // TODO change to prop
 			const tooltipOptions = (day: CalendarItem) => {
-				if (props.tooltip) {
+				if (props.tooltip && !props.noInteract) {
+                    // slots like: 'tooltip-2022-3-3'
+                    const tooltipForDate = `tooltip-${day.date.getFullYear()}-${day.date.getUTCMonth() + 1}-${day.date.getUTCDate()}`
+                    if (slots[tooltipForDate]) {
+                        console.log(slots[tooltipForDate]?.()[0])
+                        return slots[tooltipForDate]?.()[0].children
+                    }
 					if (day.count !== undefined) {
 						if (props.tooltipFormatter) {
 							return props.tooltipFormatter(day, props.tooltipUnit);
 						}
+                        if (slots['tooltip-active']) {
+                            return slots['tooltip-active']()[0].children
+                        }
 						return `<b>${day.count} ${props.tooltipUnit}</b> ${lo.value.on} ${lo.value.months[ day.date.getMonth() ]} ${day.date.getDate()}, ${day.date.getFullYear()}`;
 					} else if (props.noDataText) {
 						return `${props.noDataText}`;
 					} else if (props.noDataText !== false) {
+                        if (slots['tooltip-inactive']) {
+                            return slots['tooltip-inactive']()[0].children
+                        }
 						return `<b>No ${props.tooltipUnit}</b> ${lo.value.on} ${lo.value.months[ day.date.getMonth() ]} ${day.date.getDate()}, ${day.date.getFullYear()}`;
 					}
 				}
@@ -335,27 +340,6 @@
 				tippyInstances?.map(i => i.destroy());
 			});
 
-            const daysArray = computed(() => {
-                switch (weekDaysNo.value) {
-                    case 1:
-                        return [3] 
-                    case 2:
-                        return [2, 4] 
-                    case 3:
-                        return [1, 3, 5] 
-                    case 4:
-                        return [0, 2, 4, 6] 
-                    case 5:
-                        return [0, 1, 3, 5, 6] 
-                    case 6:
-                        return [0, 1, 2, 4, 5, 6] 
-                    case 7:
-                        return [0, 1, 2, 3, 4, 5, 6] 
-                    default:
-                        return [];
-                }
-            })
-
             const emitEvent = (day: String | Date) => {
                 if (!toRef(props, 'noInteract'))
                     emit('dayClick', day)
@@ -364,7 +348,7 @@
 			return {
 				SQUARE_BORDER_SIZE, SQUARE_SIZE, LEFT_SECTION_WIDTH, RIGHT_SECTION_WIDTH, TOP_SECTION_HEIGHT, BOTTOM_SECTION_HEIGHT,
 				svg, heatmap, dayPositions, now, width, height, viewbox, daysLabelWrapperTransform, monthsLabelWrapperTransform, yearWrapperTransform, legendWrapperTransform,
-				lo, legendViewbox, curRangeColor: rangeColor, legendDirectionReverse, daysArray,
+				lo, legendViewbox, curRangeColor: rangeColor, legendDirectionReverse, 
 				tooltipOptions, getWeekPosition, getDayPosition, getMonthLabelPosition, emitEvent, 
 			};
 		}
@@ -373,12 +357,12 @@
 
 <style lang="scss">
 
+    .no-interact {
+        Text-Decoration: None !important; 
+        pointer-events: none;
+    } 
+
 	.vch__container {
-        .legend {
-            display: flex;
-			justify-content: space-between;
-			align-items: center;
-        }
 		.vch__legend {
 			display: flex;
 			justify-content: space-between;
@@ -389,12 +373,6 @@
             }
             &.legend-right {
                 flex-direction: row-reverse;
-            }
-            &.legend-top {
-                flex-direction: column;
-            }
-            &.legend-bottom {
-                flex-direction: column-reverse;
             }
 		}
 

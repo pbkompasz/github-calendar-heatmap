@@ -49,94 +49,41 @@
             >Vertical</label>
 		</div>
 		<br>
-		<h4>
-            None
-        </h4>
-		<calendar-heatmap 
-            :values="[]" 
-            :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
-			:vertical="false"
-            :darkMode="false"
-            :legendDirectionReverse="false"
-        >
-            <template #months>
-                <!-- <div></div> -->
-            </template>
-            <template #days>
-                <!-- <div></div> -->
-            </template>
-            <template #legend-text-less>
-                <!-- <div>asd</div> -->
-            </template>
-            <template #legend-text-more>
-                <!-- <div>asd</div> -->
-            </template>
-            <template #legend-range>
-                <!-- <div>asd</div> -->
-            </template>
-        </calendar-heatmap>
+		<h4>None</h4>
+		<calendar-heatmap :values="[]" :end-date="endDate" :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
+						  :vertical="orientation === 'vertical'" :no-data-text="false"/>
 		<br>
-		<h4>
-            Some
-        </h4>
+		<h4>Some</h4>
 		<calendar-heatmap
 			:values="values"
 			:end-date="endDate"
 			:style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
+			:vertical="orientation === 'vertical'"
 			no-data-text="NOTHING"
 		/>
 		<br>
-		<h4>
-            Some (rounded corners)
-        </h4>
-		<calendar-heatmap 
-            :values="values" 
-            :end-date="endDate" 
-            :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}" 
-            :round="2"
-            :vertical="orientation === 'vertical'"
-        />
+		<h4>Some (rounded corners)</h4>
+		<calendar-heatmap :values="values" :end-date="endDate" :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}" :round="2"
+						  :vertical="orientation === 'vertical'"/>
 		<br>
-		<h4>
-            Some (circles)
-        </h4>
-		<calendar-heatmap 
-            :values="values" 
-            :end-date="endDate" 
-            :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}" 
-            :round="5"
-            :vertical="orientation === 'vertical'"
-        />
+		<h4>Some (circles)</h4>
+		<calendar-heatmap :values="values" :end-date="endDate" :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}" :round="5"
+						  :vertical="orientation === 'vertical'"/>
 		<br>
-		<h4>
-            Locale
-        </h4>
-		<calendar-heatmap 
-            :values="values" 
-            :end-date="endDate" 
-            :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}" 
-            :locale="{
-                months: [ 'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez' ],
-                days  : [ 'So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa' ],
-                on    : 'am',
-                less  : 'Weniger',
-                more  : 'Mehr'
-            }" :vertical="orientation === 'vertical'"/>
+		<h4>Locale</h4>
+		<calendar-heatmap :values="values" :end-date="endDate" :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}" :locale="{
+			months: [ 'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez' ],
+			days  : [ 'So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa' ],
+			on    : 'am',
+			less  : 'Weniger',
+			more  : 'Mehr'
+		}" :vertical="orientation === 'vertical'"/>
 		<br>
-		<h4>
-            Tooltip Unit
-        </h4>
-		<calendar-heatmap 
-            :values="values" 
-            :end-date="endDate" 
-            :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}" 
-            :tooltip-unit="picked"
-            :vertical="orientation === 'vertical'"
-        />
+		<h4>Tooltip Unit</h4>
+		<calendar-heatmap :values="values" :end-date="endDate" :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}" :tooltip-unit="picked"
+						  :vertical="orientation === 'vertical'"/>
 		<br>
-		<h4>
-            TooltipFormatter
-        </h4>
+		<h4>TooltipFormatter</h4>
 		<calendar-heatmap
 			:values="values"
 			:end-date="endDate"
@@ -146,6 +93,62 @@
 			:tooltip-unit="picked"
 			:vertical="orientation === 'vertical'"
 		/>
+        <br>
+        <h4>
+            Slots
+        </h4>
+        <calendar-heatmap 
+            :values="[{ date: '2022-1-22', count: 6 },]"
+            :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
+			:vertical="orientation === 'vertical'"
+            :darkMode="false"
+        >
+            <template #tooltip-active>
+                <div>Active message</div>
+            </template>
+            <template #tooltip-inactive>
+                <div>Inactive message</div>
+            </template>
+            <template #tooltip-2022-3-3>
+                <div>
+                    Custom message on 2022-3-3 with 6 dings
+                </div>
+            </template>
+            <template #legend-text-less>
+                <button>LESS</button>
+            </template>
+            <template #legend-text-more>
+                <button>MORE</button>
+            </template>
+            <template #legend-range>
+                <div></div>
+            </template>
+            <template #day-4>
+                DAY 4
+            </template>
+        </calendar-heatmap>
+        <h4>
+            Disable interaction
+        </h4>
+        <calendar-heatmap 
+            :values="[{ date: '2022-1-22', count: 6 },]"
+            :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
+			:vertical="orientation === 'vertical'"
+            :darkMode="false"
+            :noInteract="true"
+        >
+        </calendar-heatmap>
+        <h4>
+            Legend orientation
+        </h4>
+        <calendar-heatmap 
+            :values="[{ date: '2022-1-22', count: 6 },]"
+            :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
+			:vertical="orientation === 'vertical'"
+            :darkMode="false"
+            :legendDirectionReverse="true"
+        >
+        </calendar-heatmap>
 	</div>
 </template>
 
@@ -166,12 +169,15 @@
 		data() {
 			return {
 				values     : data,
-				endDate    : new Date('2021-08-01'),
+				endDate    : new Date(),
 				picked     : 'Dings',
 				orientation: 'horizontal'
 			};
 		}
 	});
+// TODO
+// Check to make sure original props still work
+// Remove unnecessary comments
 </script>
 
 <style>
@@ -180,3 +186,5 @@
 		font-size: 12px;
 	}
 </style>
+
+
