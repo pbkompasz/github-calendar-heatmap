@@ -142,7 +142,7 @@ export default {
 <calendar-heatmap :range-color="['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39']" .../>
 ```
 
-::: warning 
+::: tip 
   This overwrites the `darkMode`option. If you use this option, you have to handle dark mode yourself by using `rangeColor`.
 :::
 
