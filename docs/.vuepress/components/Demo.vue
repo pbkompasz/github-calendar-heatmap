@@ -1,5 +1,5 @@
 <template>
-	<div style="display: flex; justify-content: center">
+	<div :style="{display: 'flex', justifyContent: 'center', background: darkMode ? '#22272e' : '', padding: darkMode ? '10px 0' : ''}">
 		<calendar-heatmap
 			:values="data"
 			:end-date="endDate"
