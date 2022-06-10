@@ -63,7 +63,7 @@
 				>
 					<template v-for="(day, dayIndex) in week" :key="dayIndex">
 						<rect class="vch__day__square"
-							  v-if="day.date < now"
+							  v-if="day.date < now || showFuture"
 							  :rx="round"
 							  :ry="round"
 							  :transform="getDayPosition(dayIndex)"
@@ -139,6 +139,10 @@
 				type   : Boolean,
 				default: true
 			},
+      showFuture       : {
+        type   : Boolean,
+        default: false
+      },
 			tooltipUnit     : {
 				type   : String,
 				default: Heatmap.DEFAULT_TOOLTIP_UNIT
