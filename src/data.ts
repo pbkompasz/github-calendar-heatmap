@@ -3,7 +3,8 @@ import { Value } from '@/components/Heatmap';
 export const data: Value[] = [
 	{
 		'date' : '2020-11-30T23:00:00Z',
-		'count': 635000
+		'count': 635000,
+		'source' : "test"
 	},
 	{
 		'date' : '2020-12-02T23:00:00Z',

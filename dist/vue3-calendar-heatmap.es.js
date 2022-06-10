@@ -49,7 +49,8 @@ const _Heatmap = class {
       for (let i = 0, len = this.values.length; i < len; i++) {
         this._activities.set(this.keyDayParser(this.values[i].date), {
           count: this.values[i].count,
-          colorIndex: this.getColorIndex(this.values[i].count)
+          colorIndex: this.getColorIndex(this.values[i].count),
+          raw: __spreadValues({}, this.values[i])
         });
       }
     }
@@ -70,7 +71,8 @@ const _Heatmap = class {
           this._calendar[i][j] = {
             date: new Date(date.valueOf()),
             count: dayValues ? dayValues.count : void 0,
-            colorIndex: dayValues ? dayValues.colorIndex : 0
+            colorIndex: dayValues ? dayValues.colorIndex : 0,
+            raw: dayValues ? dayValues.raw : void 0
           };
           date.setDate(date.getDate() + 1);
         }
@@ -2835,10 +2837,10 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     function tooltipOptions(day) {
       if (props.tooltip) {
+        if (props.tooltipFormatter) {
+          return props.tooltipFormatter(day, props.tooltipUnit);
+        }
         if (day.count !== void 0) {
-          if (props.tooltipFormatter) {
-            return props.tooltipFormatter(day, props.tooltipUnit);
-          }
           return `<b>${day.count} ${props.tooltipUnit}</b> ${lo.value.on} ${lo.value.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`;
         } else if (props.noDataText) {
           return `${props.noDataText}`;

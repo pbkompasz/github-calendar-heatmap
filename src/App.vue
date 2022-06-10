@@ -70,12 +70,12 @@
                       :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}" :tooltip-unit="picked"
                       :vertical="orientation === 'vertical'"/>
     <br>
-    <h4>TooltipFormatter</h4>
+    <h4>TooltipFormatter 2</h4>
     <calendar-heatmap
         :values="values"
         :end-date="endDate"
         :style="{'max-width': orientation === 'vertical' ? '145px' :  '675px'}"
-        :tooltip-formatter="(c, u) => c.count ? (c.count / 3600 / 1000) + ' ' + u: 'NÖX'"
+        :tooltip-formatter="tooltipFormatter"
         no-data-text="NIX"
         :tooltip-unit="picked"
         :vertical="orientation === 'vertical'"
@@ -88,6 +88,7 @@ import {defineComponent} from 'vue';
 import Vue3CalendarHeatmap from '@/components/CalendarHeatmap.vue';
 import CalendarHeatmap from '@/components/CalendarHeatmap.vue';
 import {data} from './data';
+import {Activity, CalendarItem} from "@/components/Heatmap";
 
 export default defineComponent({
   name: 'ServeDev',
@@ -103,6 +104,13 @@ export default defineComponent({
       picked: 'Dings',
       orientation: 'horizontal'
     };
+  },
+  methods:{
+    tooltipFormatter(c:CalendarItem, u:String): string{
+      console.log(c, u)
+      console.log(c.raw);
+      return (c.count ? (c.count / 3600 / 1000) + ' ' + u: 'NÖX' )
+    }
   }
 });
 </script>

@@ -1,16 +1,19 @@
 export interface Value {
     date: Date | string;
     count: number;
+    [x: string | number | symbol]: unknown;
 }
 export interface Activity {
     count: number;
     colorIndex: number;
+    raw: unknown;
 }
 export declare type Activities = Map<string, Activity>;
 export interface CalendarItem {
     date: Date;
     count?: number;
     colorIndex: number;
+    raw?: unknown;
 }
 export declare type Calendar = CalendarItem[][];
 export interface Month {

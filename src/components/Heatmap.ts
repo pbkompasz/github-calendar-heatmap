@@ -1,11 +1,13 @@
 export interface Value {
 	date: Date | string;
 	count: number;
+	[x: string | number | symbol]: unknown;
 }
 
 export interface Activity {
 	count: number;
 	colorIndex: number;
+	raw: unknown
 }
 
 export type Activities = Map<string, Activity>;
@@ -14,6 +16,7 @@ export interface CalendarItem {
 	date: Date;
 	count?: number;
 	colorIndex: number;
+	raw?: unknown;
 }
 
 export type Calendar = CalendarItem[][];
@@ -89,7 +92,8 @@ export class Heatmap {
 			for (let i = 0, len = this.values.length; i < len; i++) {
 				this._activities.set(this.keyDayParser(this.values[ i ].date), {
 					count     : this.values[ i ].count,
-					colorIndex: this.getColorIndex(this.values[ i ].count)
+					colorIndex: this.getColorIndex(this.values[ i ].count),
+					raw : {...this.values[ i ]}
 				});
 			}
 		}
@@ -112,7 +116,8 @@ export class Heatmap {
 					this._calendar[ i ][ j ] = {
 						date      : new Date(date.valueOf()),
 						count     : dayValues ? dayValues.count : undefined,
-						colorIndex: dayValues ? dayValues.colorIndex : 0
+						colorIndex: dayValues ? dayValues.colorIndex : 0,
+						raw : dayValues? dayValues.raw : undefined
 					};
 					date.setDate(date.getDate() + 1);
 				}

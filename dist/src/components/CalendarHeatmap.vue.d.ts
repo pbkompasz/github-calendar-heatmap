@@ -176,6 +176,9 @@ declare const _default: import("vue").DefineComponent<{
         };
         max: number;
         values: {
+            [x: string]: unknown;
+            [x: number]: unknown;
+            [x: symbol]: unknown;
             date: string | {
                 toString: () => string;
                 toDateString: () => string;
@@ -303,6 +306,7 @@ declare const _default: import("vue").DefineComponent<{
             };
             count?: number | undefined;
             colorIndex: number;
+            raw?: unknown;
         }[][];
         readonly firstFullWeekOfMonths: {
             value: number;
