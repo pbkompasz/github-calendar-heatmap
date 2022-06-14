@@ -24,6 +24,7 @@
     "email": "mensch.meier@live.de",
     "url": "razorness.de"
   },
+  "homepage": "https://razorness.github.io/vue3-calendar-heatmap",
   "license": "MIT",
   "repository": {
     "type": "git",
