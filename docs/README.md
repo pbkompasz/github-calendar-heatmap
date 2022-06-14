@@ -122,7 +122,8 @@ export default {
 <calendar-heatmap dark-mode .../>
 ```
 
-#### Example (:round="0")
+#### Example
+<Demo dark-mode/>
 
 ### rangeColor
 
@@ -135,9 +136,15 @@ export default {
     - The color at `rangeColor[1]` will always represent the values for a `count: 0`
     - The others are automatically distributed over the maximum value of count, unless you specify `max` props.
 
+
+
 ```html:no-line-numbers
 <calendar-heatmap :range-color="['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39']" .../>
 ```
+
+::: tip 
+  This overwrites the `darkMode`option. If you use this option, you have to handle dark mode yourself by using `rangeColor`.
+:::
 
 #### Example
 
