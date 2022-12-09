@@ -23,27 +23,27 @@
     <br>
     <h4>None</h4>
     <calendar-heatmap :values="[]" :end-date="endDate"
-      :style="{ 'max-width': orientation === 'vertical' ? '145px' : '675px' }" :vertical="orientation === 'vertical'"
+      :vertical="orientation === 'vertical'"
       :no-data-text="false" />
     <br>
     <h4>Some</h4>
     <calendar-heatmap :values="values" :end-date="endDate"
-      :style="{ 'max-width': orientation === 'vertical' ? '145px' : '675px' }" :vertical="orientation === 'vertical'"
+      :vertical="orientation === 'vertical'"
       no-data-text="NOTHING" />
     <br>
     <h4>Some (rounded corners)</h4>
     <calendar-heatmap :values="values" :end-date="endDate"
-      :style="{ 'max-width': orientation === 'vertical' ? '145px' : '675px' }" :round="2"
+      :round="2"
       :vertical="orientation === 'vertical'" />
     <br>
     <h4>Some (circles)</h4>
     <calendar-heatmap :values="values" :end-date="endDate"
-      :style="{ 'max-width': orientation === 'vertical' ? '145px' : '675px' }" :round="5"
+      :round="5"
       :vertical="orientation === 'vertical'" />
     <br>
     <h4>Locale</h4>
     <calendar-heatmap :values="values" :end-date="endDate"
-      :style="{ 'max-width': orientation === 'vertical' ? '145px' : '675px' }" :locale="{
+      :locale="{
         months: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
         days: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
         on: 'am',
@@ -53,20 +53,19 @@
     <br>
     <h4>Tooltip Unit</h4>
     <calendar-heatmap :values="values" :end-date="endDate"
-      :style="{ 'max-width': orientation === 'vertical' ? '145px' : '675px' }" :tooltip-unit="picked"
+      :tooltip-unit="picked"
       :vertical="orientation === 'vertical'" />
     <br>
     <h4>TooltipFormatter</h4>
     <calendar-heatmap :values="values" :end-date="endDate"
-      :style="{ 'max-width': orientation === 'vertical' ? '145px' : '675px' }"
-      :tooltip-formatter="(c, u) => c.count ? (c.count / 3600 / 1000) + ' ' + u : 'NÖX'" no-data-text="NIX"
+            :tooltip-formatter="(c, u) => c.count ? (c.count / 3600 / 1000) + ' ' + u : 'NÖX'" no-data-text="NIX"
       :tooltip-unit="picked" :vertical="orientation === 'vertical'" />
     <br>
     <h4>
       Slots
     </h4>
     <calendar-heatmap :values="[{ date: '2022-1-22', count: 6 },]"
-      :style="{ 'max-width': orientation === 'vertical' ? '145px' : '675px' }" :vertical="orientation === 'vertical'"
+      :vertical="orientation === 'vertical'"
       :darkMode="false">
       <template #tooltip-active>
         <div>Active message</div>
@@ -96,14 +95,14 @@
       Disable interaction
     </h4>
     <calendar-heatmap :values="[{ date: '2022-1-22', count: 6 },]"
-      :style="{ 'max-width': orientation === 'vertical' ? '145px' : '675px' }" :vertical="orientation === 'vertical'"
+      :vertical="orientation === 'vertical'"
       :darkMode="false" :noInteract="true">
     </calendar-heatmap>
     <h4>
       Legend orientation
     </h4>
     <calendar-heatmap :values="[{ date: '2022-1-22', count: 6 },]"
-      :style="{ 'max-width': orientation === 'vertical' ? '145px' : '675px' }" :vertical="orientation === 'vertical'"
+      :vertical="orientation === 'vertical'"
       :darkMode="false" :legendDirectionReverse="true">
     </calendar-heatmap>
   </div>
@@ -111,9 +110,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-// @ts-ignore
-import Vue3CalendarHeatmap from '@/components/CalendarHeatmap.vue';
-// @ts-ignore
+import GithubCalendarHeatmap from '@/components/CalendarHeatmap.vue';
 import CalendarHeatmap from '@/components/CalendarHeatmap.vue';
 import { data } from './data';
 
@@ -121,6 +118,7 @@ const values = ref(data);
 const endDate =  ref(new Date());
 const picked = ref('Dings');
 const orientation = ref('horizontal');
+const hex = ref();
 </script>
 
 <style>

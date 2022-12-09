@@ -1,5 +1,6 @@
 <template>
-  <div :class="{ 'vch__container': true, 'dark-mode': darkMode, 'no-interact': noInteract }">
+  <div
+    :class="{ 'container': true, 'dark-mode': darkMode, 'no-interact': noInteract, 'container--vertical': vertical === true }">
     <svg class="vch__wrapper" ref="svg" :viewBox="viewbox">
 
       <!-- MONTHS -->
@@ -7,7 +8,7 @@
         <!-- Months that appear on the left side of the calendar -->
         <text class="vch__month__label" v-for="(month, index) in heatmap.firstFullWeekOfMonths" :key="index"
           :x="getMonthLabelPosition(month).x" :y="getMonthLabelPosition(month).y">
-          {{ lo.months[month.value] }}
+          <!-- {{ lo.months[month.value] }} -->
         </text>
       </g>
 
@@ -19,7 +20,7 @@
             :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : (8 + i * SQUARE_SIZE)">
             <slot :name="'day-' + i">
               <template v-if="[1, 3, 5].includes(i)">
-                {{ lo.days[i] }}
+                <!-- {{ lo.days[i] }} -->
               </template>
             </slot>
           </text>
@@ -62,7 +63,7 @@
           <svg v-if="!vertical" class="vch__external-legend-wrapper" :viewBox="legendViewbox"
             :height="SQUARE_SIZE - SQUARE_BORDER_SIZE">
             <g class="vch__legend__wrapper">
-              <rect v-for="(color, index) in curRangeColor" :key="index" :rx="round" :ry="round"
+              <rect v-for="(color, index) in rangeColor" :key="index" :rx="round" :ry="round"
                 :style="{ fill: color }" :width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
                 :height="SQUARE_SIZE - SQUARE_BORDER_SIZE" :x="SQUARE_SIZE * index" />
             </g>
@@ -96,7 +97,8 @@ const props = defineProps({
     type: Number
   },
   rangeColor: {
-    type: Array as PropType<string[]>
+    type: Array as PropType<string[]>,
+    default: Heatmap.DEFAULT_RANGE_COLOR_LIGHT,
   },
   // Main values
   values: {
@@ -174,10 +176,9 @@ const SQUARE_BORDER_SIZE = Heatmap.SQUARE_SIZE / 5,
   daysLabelWrapperTransform = ref(''),
   monthsLabelWrapperTransform = ref(''),
   legendWrapperTransform = ref(''),
-  lo = ref<Locale>({} as any),
-  rangeColor = ref<string[]>(props.rangeColor || (props.darkMode ? Heatmap.DEFAULT_RANGE_COLOR_DARK : Heatmap.DEFAULT_RANGE_COLOR_LIGHT));
+  lo = ref<Locale>({} as any);
 
-const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse } = toRefs(props);
+const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse, rangeColor } = toRefs(props);
 
 
 let tippyInstances: Instance[],
@@ -197,6 +198,7 @@ const initTippy = () => {
 
 const slots = useSlots();
 const tooltipOptions = (day: CalendarItem) => {
+  return;
   if (props.tooltip && !props.noInteract) {
     // slots like: 'tooltip-2022-3-3'
     const tooltipForDate = `tooltip-${day.date.getFullYear()}-${day.date.getUTCMonth() + 1}-${day.date.getUTCDate()}`
@@ -270,7 +272,7 @@ watch([width, height, rangeColor], ([w, h, rc]) => {
     : `translate(${w - (SQUARE_SIZE * rc.length) - 30}, ${h - BOTTOM_SECTION_HEIGHT})`;
 }, { immediate: true });
 
-watch(locale, l => (lo.value = l ? { ...Heatmap.DEFAULT_LOCALE, ...l } : Heatmap.DEFAULT_LOCALE), { immediate: true });
+// watch(locale, l => (lo.value = l ? { ...Heatmap.DEFAULT_LOCALE, ...l } : Heatmap.DEFAULT_LOCALE), { immediate: true });
 watch(rangeColor, rc => (legendViewbox.value = `0 0 ${Heatmap.SQUARE_SIZE * (rc.length + 1)} ${Heatmap.SQUARE_SIZE}`), { immediate: true });
 
 watch(
@@ -303,7 +305,16 @@ const emitEvent = (day: any) => {
   pointer-events: none;
 }
 
+.container {
+  max-width: 675px;
+}
+
+.container--vertical {
+  max-width: 145px;
+}
+
 .vch__container {
+  max-width: 675px;
   .vch__legend {
     display: flex;
     justify-content: space-between;
