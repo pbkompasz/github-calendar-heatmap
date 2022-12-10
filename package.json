@@ -22,7 +22,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pbkompasz/vue3-calendar-heatmap.git"
+    "url": "https://github.com/pbkompasz/github-heatmap.git"
   },
   "sideEffects": false,
   "scripts": {
@@ -33,7 +33,7 @@
     "docs:build": "vuepress build docs --clean-cache"
   },
   "dependencies": {
-    "tippy.js": "^6.3.7"
+    "vue-tippy": "^6.0.0-alpha.50"
   },
   "devDependencies": {
     "@types/node": "^16.11.24",
