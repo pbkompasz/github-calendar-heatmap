@@ -1,21 +1,11 @@
 <template>
   <div
     :class="{ 'calendar': true, 'calendar--dark': darkMode, 'calendar--no_interact': noInteract, 'calendar--vertical': vertical === true }">
+    
+    <div style="display: flex;">
 
-    {{ darkMode }}
-    {{monthsLabelWrapperTransform}}
-    {{daysLabelWrapperTransform}}
-    <svg class="calendar__wrapper" ref="svg" :viewBox="viewbox">
-
-      <!-- MONTHS -->
-      <g class="calendar__months" :transform="monthsLabelWrapperTransform">
-        <text class="calendar__months__label" :class="{'calendar__months--dark': darkMode}" v-for="(month, index) in heatmap.firstFullWeekOfMonths" :key="index"
-          :x="getMonthLabelPosition(month).x" :y="getMonthLabelPosition(month).y">
-          {{ lo.months[month.value] }}
-        </text>
-      </g>
-
-      <!-- DAYS -->
+    <!-- DAYS -->
+    <svg viewbox="0 0 0 0" width="25" class="days" :height="svg?.clientHeight">
       <g class="calendar__days" :transform="daysLabelWrapperTransform">
         <!-- Days that appear on the left side of the calendar -->
         <template v-for="i in Array(7).keys()" :key="i">
@@ -29,6 +19,19 @@
           </text>
         </template>
       </g>
+    </svg>
+
+    <svg class="calendar__wrapper" ref="svg" :viewBox="viewbox">
+
+      <!-- MONTHS -->
+      <g class="calendar__months" :transform="monthsLabelWrapperTransform">
+        <text class="calendar__months__label" :class="{'calendar__months--dark': darkMode}" v-for="(month, index) in heatmap.firstFullWeekOfMonths" :key="index"
+          :x="getMonthLabelPosition(month).x" :y="getMonthLabelPosition(month).y">
+          {{ lo.months[month.value] }}
+        </text>
+      </g>
+
+      
 
       <!-- VERTICAL CALENDAR -->
       <g v-if="vertical" class="vch__legend__wrapper" :transform="legendWrapperTransform">
@@ -73,21 +76,22 @@
         </g>
       </g>
     </svg>
+    </div>
 
     <!-- LEGEND -->
     <slot name="footer">
       <div class="calendar__footer">
 
-      <slot name="footer-link">
-        <a
-          class="calendar__footer__link"
-          :class="{'calendar__footer__link--dark': darkMode}"
-          href="link"
-        >
-          link here
-        </a>
-              
-      </slot>
+        <slot name="footer-link">
+          <a
+            class="calendar__footer__link"
+            :class="{'calendar__footer__link--dark': darkMode}"
+            href="link"
+          >
+            link here
+          </a>
+                
+        </slot>
     <div
       v-if="!vertical"
       :class="`calendar__footer__legend calendar__footer__legend-${(legendDirectionReverse ? (vertical ? 'bottom' : 'left') : (vertical ? 'top' : 'right'))}`"
@@ -124,11 +128,11 @@
           <slot name="legend-text-more">
             {{ lo.more }}
           </slot>
-          </div>
         </div>
       </div>
-    </slot>
-  </div>
+    </div>
+  </slot>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -233,6 +237,22 @@ const SQUARE_BORDER_SIZE = Heatmap.SQUARE_SIZE / 5,
   monthsLabelWrapperTransform = ref('');
 
 const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse, rangeColor, darkMode } = toRefs(props);
+
+const language = computed(() => {
+  // const locale = Heatmap.DEFAULT_LOCALE;
+  let language = 'en-US';
+
+  if (navigator.languages && navigator.languages.length > 0) {
+    language = navigator.languages[0];
+  } else if (navigator.language) {
+    language = navigator.language;
+  }
+
+  return language;  
+})
+
+onMounted(() => {
+})
 
 const slots = useSlots();
 
@@ -346,6 +366,12 @@ const { radiusX, radiusY, } = parseRadius(props.radius);
 
 .calendar {
   max-width: 675px;
+  overflow-x: scroll;
+}
+
+.calendar__wrapper {
+  min-width: 650px;
+  max-width: 650px;
 }
 
 .calendar--vertical {
@@ -354,6 +380,37 @@ const { radiusX, radiusY, } = parseRadius(props.radius);
 
 .calendar__days, .calendar__months {
   font-size: 9px;
+}
+
+.calendar__days {
+  position: absolute;
+}
+
+@media only screen and (max-width: 675px) {
+  .calendar {
+    background-color: lightblue;
+  }
+  .calendar__footer__legend {
+    position: fixed;
+    right: 15px;
+  }
+  .calendar__footer__link {
+    position: fixed;
+  }
+  .calendar__footer {
+    min-height: 14px;
+  }
+  .calendar__wrapper {
+    left: 25px;
+  } 
+
+  .days {
+    background-color: lightblue;
+  }
+}
+
+.days {
+  position: absolute;
 }
 
 .calendar__months__label,
@@ -414,5 +471,19 @@ const { radiusX, radiusY, } = parseRadius(props.radius);
 .calendar__footer__legend__less--dark,
 .calendar__footer__legend__more--dark {
   color: #fff;
+}
+
+::-webkit-scrollbar {
+  height: 7px;
+}
+
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: grey; 
+}
+
+.svg {
+  display: inline;
 }
 </style>
