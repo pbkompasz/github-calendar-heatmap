@@ -36,7 +36,7 @@
       <!-- VERTICAL CALENDAR -->
       <g v-if="vertical" class="vch__legend__wrapper" :transform="legendWrapperTransform">
         <text :x="SQUARE_SIZE * 1.25" y="8">{{ lo.less }}</text>
-        <rect v-for="(color, index) in rangeColor" :key="index" :rx="radiusX" :ry="radiusY" :style="{ fill: color }"
+        <rect v-for="(color, index) in rangeColor" :key="index" :rx="radius" :ry="radius" :style="{ fill: color }"
           :width="SQUARE_SIZE - SQUARE_BORDER_SIZE" :height="SQUARE_SIZE - SQUARE_BORDER_SIZE" :x="SQUARE_SIZE * 1.75"
           :y="SQUARE_SIZE * (index + 1)" />
         <text :x="SQUARE_SIZE * 1.25" :y="SQUARE_SIZE * (rangeColor.length + 2) - SQUARE_BORDER_SIZE">
@@ -63,8 +63,8 @@
               class="calendar__main__year__month__day"
               :class="{'calendar__main__year__month__day--dark': darkMode}"
               v-if="day.date < now"
-              :rx="radiusX"
-              :ry="radiusY"
+              :rx="radius"
+              :ry="radius"
               :transform="getDayPosition(dayIndex)"
               :width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
               :height="SQUARE_SIZE - SQUARE_BORDER_SIZE"
@@ -113,8 +113,8 @@
               <rect
                 v-for="(color, index) in rangeColor"
                 :key="index"
-                :rx="radiusX"
-                :ry="radiusY"
+                :rx="radius"
+                :ry="radius"
                 :style="{ fill: color }"
                 :width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
                 :height="SQUARE_SIZE - SQUARE_BORDER_SIZE"
@@ -137,88 +137,16 @@
 
 <script setup lang="ts">
 import { defineComponent, nextTick, onBeforeUnmount, onMounted, PropType, ref, toRef, toRefs, watch, computed, useSlots } from 'vue';
-import { CalendarItem, Heatmap, Locale, Month, TooltipFormatter, Value } from '@/components/Heatmap';
+import { Heatmap, } from '@/components/Heatmap';
+import type { CalendarItem, Locale, Month, TooltipFormatter, Value } from '../types';
 import Tooltip from '@/components/Tooltip.vue';
-import { parseRadius, validateRadius } from '@/util';
+import { Ref } from 'vue';
+import Props from './props';
 
-const props = defineProps({
-  // Calendar end date
-  endDate: {
-    type: Date,
-    // required: true,
-    default: new Date(),
-  },
-  startDate: {
-    type: Date,
-    default: null,
-  },
-  // DUNNO
-  max: {
-    type: Number
-  },
-  rangeColor: {
-    type: Array as PropType<string[]>,
-    default: Heatmap.DEFAULT_RANGE_COLOR_LIGHT,
-  },
-  // Main values
-  values: {
-    type: Array as PropType<Value[]>,
-    required: true
-  },
-  locale: {
-    type: Object as PropType<Partial<Locale>>,
-    default: null,
-  },
-  // Show tooltip
-  tooltip: {
-    type: Boolean,
-    default: true
-  },
-  tooltipUnit: {
-    type: String,
-    default: Heatmap.DEFAULT_TOOLTIP_UNIT
-  },
-  tooltipFormatter: {
-    type: Function as PropType<TooltipFormatter>
-  },
-  // Calendar orientation
-  vertical: {
-    type: Boolean,
-    default: false
-  },
-  // Tooltip text on date with no data
-  noDataText: {
-    type: [Boolean, String,],
-    default: null
-  },
-  // Show no tooltip for empty dates
-  noDataTooltip: {
-    type: Boolean,
-    default: false,
-  },
-  // Rounded corner for each date
-  // Takes ame values as border-radius html attribute
-  radius: {
-    type: [String, Number,],
-    default: '20%',
-    validator: (val: string) => {
+type Color = `#${string}`;
 
-      return validateRadius(val);
+const props = defineProps(Props);
 
-    },
-  },
-  darkMode: Boolean,
-  // default is right if horizontal, top if vertical
-  legendDirectionReverse: {
-    type: Boolean,
-    default: false,
-  },
-  // No hover effect, no tooltip, no click event emit
-  noInteract: {
-    type: Boolean,
-    default: false,
-  }
-});
 const SQUARE_BORDER_SIZE = Heatmap.SQUARE_SIZE / 5,
   SQUARE_SIZE = Heatmap.SQUARE_SIZE + SQUARE_BORDER_SIZE,
   LEFT_SECTION_WIDTH = Math.ceil(Heatmap.SQUARE_SIZE * 2.5),
@@ -236,7 +164,9 @@ const SQUARE_BORDER_SIZE = Heatmap.SQUARE_SIZE / 5,
   daysLabelWrapperTransform = ref(''),
   monthsLabelWrapperTransform = ref('');
 
-const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse, rangeColor, darkMode } = toRefs(props);
+const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse, darkMode, radius, colors, darkColors, lightColors, } = toRefs(props);
+
+const rangeColor = ref(Heatmap.DEFAULT_RANGE_COLOR_LIGHT) as Ref<Color[]>;
 
 const language = computed(() => {
   // const locale = Heatmap.DEFAULT_LOCALE;
@@ -289,7 +219,9 @@ const getWeekPosition = (index: number) => {
   if (props.vertical) {
     return `translate(0, ${(SQUARE_SIZE * heatmap.value.weekCount) - ((index + 1) * SQUARE_SIZE)})`;
   }
-  return `translate(${index * SQUARE_SIZE}, 0)`;
+  // TODO
+  const weekGap = 0;
+  return `translate(${index * (SQUARE_SIZE + weekGap)}, 0)`;
 }
 
 const getDayPosition = (index: number) => {
@@ -306,8 +238,18 @@ const getMonthLabelPosition = (month: Month) => {
   return { x: SQUARE_SIZE * month.index, y: SQUARE_SIZE - SQUARE_BORDER_SIZE };
 }
 
-watch([toRef(props, 'rangeColor'), toRef(props, 'darkMode')], ([rc, dm]) => {
-  rangeColor.value = rc || (dm ? Heatmap.DEFAULT_RANGE_COLOR_DARK : Heatmap.DEFAULT_RANGE_COLOR_LIGHT);
+watch([colors, darkColors, lightColors, toRef(props, 'darkMode')], ([c, darkC, lightC, darkMode]) => {
+  console.log(darkMode);
+  if (colors.value) {
+    rangeColor.value = colors.value as Color[];
+    return;
+  }
+  if (darkMode) {
+    rangeColor.value = darkC as Color[] ?? Heatmap.DEFAULT_RANGE_COLOR_DARK;
+  } else {
+    rangeColor.value = lightC as Color[] ?? Heatmap.DEFAULT_RANGE_COLOR_LIGHT;
+  }
+  console.log(rangeColor);
 });
 
 const viewbox = computed(() => {
@@ -353,8 +295,6 @@ const emitEvent = (day: any) => {
     emit('dayClick', day)
 }
 
-// Radius for every day rectangle
-const { radiusX, radiusY, } = parseRadius(props.radius);
 </script>
 
 <style lang="scss">
