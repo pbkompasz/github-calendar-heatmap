@@ -22,5 +22,4 @@ yarn-error.log*
 .tmp
 .temp
 
-yarn.lock
-package-lock.json
+TODO
