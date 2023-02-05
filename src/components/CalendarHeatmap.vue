@@ -1,81 +1,69 @@
 <template>
   <div
     :class="{ 'calendar': true, 'calendar--dark': darkMode, 'calendar--no_interact': noInteract, 'calendar--vertical': vertical === true }">
-    
+
     <div style="display: flex;">
 
-    <!-- DAYS -->
-    <svg viewbox="0 0 0 0" width="25" class="days" :height="svg?.clientHeight">
-      <g class="calendar__days" :transform="daysLabelWrapperTransform">
-        <!-- Days that appear on the left side of the calendar -->
-        <template v-for="i in Array(7).keys()" :key="i">
-          <text class="calendar__days__label" :class="{'calendar__months--dark': darkMode}" :x="vertical ? SQUARE_SIZE * i : 0"
-            :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : (8 + i * SQUARE_SIZE)">
-            <slot :name="'day-' + i">
-              <template v-if="[1, 3, 5].includes(i)">
-                {{ lo.days[i] }}
-              </template>
-            </slot>
-          </text>
-        </template>
-      </g>
-    </svg>
 
-    <svg class="calendar__wrapper" ref="svg" :viewBox="viewbox">
-
-      <!-- MONTHS -->
-      <g class="calendar__months" :transform="monthsLabelWrapperTransform">
-        <text class="calendar__months__label" :class="{'calendar__months--dark': darkMode}" v-for="(month, index) in heatmap.firstFullWeekOfMonths" :key="index"
-          :x="getMonthLabelPosition(month).x" :y="getMonthLabelPosition(month).y">
-          {{ lo.months[month.value] }}
-        </text>
-      </g>
-
-      
-
-      <!-- VERTICAL CALENDAR -->
-      <g v-if="vertical" class="vch__legend__wrapper" :transform="legendWrapperTransform">
-        <text :x="SQUARE_SIZE * 1.25" y="8">{{ lo.less }}</text>
-        <rect v-for="(color, index) in rangeColor" :key="index" :rx="radius" :ry="radius" :style="{ fill: color }"
-          :width="SQUARE_SIZE - SQUARE_BORDER_SIZE" :height="SQUARE_SIZE - SQUARE_BORDER_SIZE" :x="SQUARE_SIZE * 1.75"
-          :y="SQUARE_SIZE * (index + 1)" />
-        <text :x="SQUARE_SIZE * 1.25" :y="SQUARE_SIZE * (rangeColor.length + 2) - SQUARE_BORDER_SIZE">
-          {{ lo.more }}
-        </text>
-      </g>
-
-      <!-- MAIN CALENDAR -->
-      <g
-        class="calendar__main__year"
-        :transform="yearWrapperTransform"
-      >
-        <g
-          class="calendar__main__year__month"
-          v-for="(week, weekIndex) in heatmap.calendar"
-          :key="weekIndex"
-          :transform="getWeekPosition(weekIndex)"
-        >
-          <template
-            v-for="(day, dayIndex) in week"
-            :key="dayIndex"
-          >
-            <rect
-              class="calendar__main__year__month__day"
-              :class="{'calendar__main__year__month__day--dark': darkMode}"
-              v-if="day.date < now"
-              :rx="radius"
-              :ry="radius"
-              :transform="getDayPosition(dayIndex)"
-              :width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
-              :height="SQUARE_SIZE - SQUARE_BORDER_SIZE"
-              :style="{ fill: rangeColor[day.colorIndex] }"
-              :data-tippy-content="tooltipOptions(day)"
-              @click="emitEvent(day)"
-            />
+      <!-- DAYS -->
+      <svg viewbox="0 0 0 0" width="25" class="days" :height="svg?.clientHeight">
+        <g class="calendar__days" :transform="daysLabelWrapperTransform">
+          <!-- Days that appear on the left side of the calendar -->
+          <template v-for="i in Array(7).keys()" :key="i">
+            <text class="calendar__days__label" :class="{ 'calendar__months--dark': darkMode }"
+              :x="vertical ? SQUARE_SIZE * i : 0"
+              :y="vertical ? SQUARE_SIZE - SQUARE_BORDER_SIZE : (8 + i * SQUARE_SIZE)">
+              <slot :name="'day-' + i">
+                <template v-if="[1, 3, 5].includes(i)">
+                  {{ lo.days[i] }}
+                </template>
+              </slot>
+            </text>
           </template>
         </g>
-      </g>
-    </svg>
+      </svg>
+
+      <svg class="calendar__wrapper" ref="svg" :viewBox="viewbox">
+
+        <!-- MONTHS -->
+        <g class="calendar__months" :transform="monthsLabelWrapperTransform">
+          <text class="calendar__months__label" :class="{ 'calendar__months--dark': darkMode }"
+            v-for="(month, index) in heatmap.firstFullWeekOfMonths" :key="index" :x="getMonthLabelPosition(month).x"
+            :y="getMonthLabelPosition(month).y">
+            {{ lo.months[month.value] }}
+          </text>
+        </g>
+
+
+
+        <!-- VERTICAL CALENDAR -->
+        <g v-if="vertical" class="vch__legend__wrapper" :transform="legendWrapperTransform">
+          <text :x="SQUARE_SIZE * 1.25" y="8">{{ lo.less }}</text>
+          <rect v-for="(color, index) in rangeColor" :key="index" :rx="radius" :ry="radius" :style="{ fill: color }"
+            :width="SQUARE_SIZE - SQUARE_BORDER_SIZE" :height="SQUARE_SIZE - SQUARE_BORDER_SIZE" :x="SQUARE_SIZE * 1.75"
+            :y="SQUARE_SIZE * (index + 1)" />
+          <text :x="SQUARE_SIZE * 1.25" :y="SQUARE_SIZE * (rangeColor.length + 2) - SQUARE_BORDER_SIZE">
+            {{ lo.more }}
+          </text>
+        </g>
+
+        
+
+        <!-- MAIN CALENDAR -->
+        <g class="calendar__main__year" :transform="yearWrapperTransform">
+          <g class="calendar__main__year__month" v-for="(week, weekIndex) in heatmap.calendar" :key="weekIndex"
+            :transform="getWeekPosition(weekIndex)">
+            <template v-for="(day, dayIndex) in week" :key="dayIndex">
+              <rect class="calendar__main__year__month__day" :id="createId(day)"
+                :class="{ 'calendar__main__year__month__day--dark': darkMode }" v-if="day.date < now" :rx="radius"
+                :ry="radius" :transform="getDayPosition(dayIndex)" :width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
+                :height="SQUARE_SIZE - SQUARE_BORDER_SIZE" :style="{ fill: rangeColor[day.colorIndex] }"
+                @click="emitEvent(day)"
+              />
+            </template>
+          </g>
+        </g>
+      </svg>
     </div>
 
     <!-- LEGEND -->
@@ -83,56 +71,39 @@
       <div class="calendar__footer">
 
         <slot name="footer-link">
-          <a
-            class="calendar__footer__link"
-            :class="{'calendar__footer__link--dark': darkMode}"
-            href="link"
-          >
+          <a class="calendar__footer__link" :class="{ 'calendar__footer__link--dark': darkMode }" href="link">
             link here
           </a>
-                
-        </slot>
-    <div
-      v-if="!vertical"
-      :class="`calendar__footer__legend calendar__footer__legend-${(legendDirectionReverse ? (vertical ? 'bottom' : 'left') : (vertical ? 'top' : 'right'))}`"
-    >
-      <div :class="{'calendar__footer__legend__less--dark': darkMode}">
-        <slot name="legend-text-less">
-          {{ lo.less }}
-        </slot>
-      </div>
 
-        <slot name="legend-range">
-          <svg
-            v-if="!vertical"
-            class="vch__external-legend-wrapper"
-            :viewBox="legendViewbox"
-            :height="SQUARE_SIZE - SQUARE_BORDER_SIZE"
-          >
-            <g class="vch__legend__wrapper">
-              <rect
-                v-for="(color, index) in rangeColor"
-                :key="index"
-                :rx="radius"
-                :ry="radius"
-                :style="{ fill: color }"
-                :width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
-                :height="SQUARE_SIZE - SQUARE_BORDER_SIZE"
-                :x="SQUARE_SIZE * index"
-              />
-            </g>
-          </svg>
         </slot>
+        <div v-if="!vertical"
+          :class="`calendar__footer__legend calendar__footer__legend-${(legendDirectionReverse ? (vertical ? 'bottom' : 'left') : (vertical ? 'top' : 'right'))}`">
+          <div :class="{ 'calendar__footer__legend__less--dark': darkMode }">
+            <slot name="legend-text-less">
+              {{ lo.less }}
+            </slot>
+          </div>
 
-        <div :class="{'calendar__footer__legend__more--dark': darkMode}">
-          <slot name="legend-text-more">
-            {{ lo.more }}
+          <slot name="legend-range">
+            <svg v-if="!vertical" class="vch__external-legend-wrapper" :viewBox="legendViewbox"
+              :height="SQUARE_SIZE - SQUARE_BORDER_SIZE">
+              <g class="vch__legend__wrapper">
+                <rect v-for="(color, index) in rangeColor" :key="index" :rx="radius" :ry="radius"
+                  :style="{ fill: color }" :width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
+                  :height="SQUARE_SIZE - SQUARE_BORDER_SIZE" :x="SQUARE_SIZE * index" />
+              </g>
+            </svg>
           </slot>
+
+          <div :class="{ 'calendar__footer__legend__more--dark': darkMode }">
+            <slot name="legend-text-more">
+              {{ lo.more }}
+            </slot>
+          </div>
         </div>
       </div>
-    </div>
-  </slot>
-</div>
+    </slot>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -142,6 +113,8 @@ import type { CalendarItem, Locale, Month, TooltipFormatter, Value } from '../ty
 import Tooltip from '@/components/Tooltip.vue';
 import { Ref } from 'vue';
 import Props from './props';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 
 type Color = `#${string}`;
 
@@ -178,10 +151,22 @@ const language = computed(() => {
     language = navigator.language;
   }
 
-  return language;  
+  return language;
 })
 
 onMounted(() => {
+  const createTooltip = (dateOrAlias: string | Date) => {
+    let id;
+    if (typeof dateOrAlias === 'string') {
+      id = dateOrAlias
+    } else {
+      id = `_${dateOrAlias.valueOf()}`;
+    }
+    return id;
+  }
+  tippy(`#${createTooltip(new Date(2022, 0, 23))}`, {
+    content: 'My tooltip!',
+  });
 })
 
 const slots = useSlots();
@@ -295,10 +280,17 @@ const emitEvent = (day: any) => {
     emit('dayClick', day)
 }
 
+// A day can be accessed by alias or date e.g. '<YEAR>-<MONTH>-<DAY>'
+const createId = (day: any) => {
+  if (day?.alias) return day.alias;
+  const id = `_${day.date.valueOf()}`;
+  console.log(id)
+  return id;
+}
+
 </script>
 
 <style lang="scss">
-
 .calendar--no_interact {
   Text-Decoration: None !important;
   pointer-events: none;
@@ -318,7 +310,8 @@ const emitEvent = (day: any) => {
   max-width: 145px;
 }
 
-.calendar__days, .calendar__months {
+.calendar__days,
+.calendar__months {
   font-size: 9px;
 }
 
@@ -330,19 +323,23 @@ const emitEvent = (day: any) => {
   .calendar {
     background-color: lightblue;
   }
+
   .calendar__footer__legend {
     position: fixed;
     right: 15px;
   }
+
   .calendar__footer__link {
     position: fixed;
   }
+
   .calendar__footer {
     min-height: 14px;
   }
+
   .calendar__wrapper {
     left: 25px;
-  } 
+  }
 
   .days {
     background-color: lightblue;
@@ -364,6 +361,7 @@ const emitEvent = (day: any) => {
   stroke-width: 2px;
   paint-order: stroke;
 }
+
 .calendar__main__year__month__day:focus {
   outline: none;
 }
@@ -394,7 +392,7 @@ const emitEvent = (day: any) => {
   line-height: 10px;
   width: 100%;
 
-  
+
 }
 
 .calendar--dark,
@@ -417,10 +415,10 @@ const emitEvent = (day: any) => {
   height: 7px;
 }
 
- 
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: grey; 
+  background: grey;
 }
 
 .svg {
