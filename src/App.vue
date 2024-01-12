@@ -1,91 +1,111 @@
 <template>
-  <div :class="{ 'main': true, 'main--dark': darkmode }" style="width: 100%; height: 100vh">
-    <div>
+  <div class="pa-md-4">
+    <h1>Playground</h1>
+    <calendar-heatmap :values="values" :dark-mode="darkmode" :end-date="endDate" :vertical="orientation === 'vertical'"
+      no-data-text="NOTHING" />
 
-
-
+    <v-card title="Settings" class="pa-md-4 mt-md-8">
       <h4>Unit Select</h4>
-      <input type="radio" id="two" value="contributions" v-model="picked" />
-      <label for="one">Default (contributions)</label>
-      <br />
-      <input type="radio" id="two" value="Da" v-model="picked" />
-      <label for="two">Da</label>
-      <br />
-      <input type="radio" id="one" value="Dings" v-model="picked" />
-      <label for="two">Dings</label>
+      <v-text-field label="Unit" class="flex-shrink-0" v-model="unit"></v-text-field>
       <br />
 
       <h4>Orientation</h4>
-      <input type="radio" id="horizontal" value="horizontal" v-model="orientation" />
-      <label for="one">Horizontal</label>
-      <br />
-      <input type="radio" id="vertical" value="vertical" v-model="orientation" />
-      <label for="two">Vertical</label>
+      <v-radio-group>
+        <v-radio label="Row" value="row" v-model="orientation"></v-radio>
+        <v-radio label="Row reverse" value="row-reverse" v-model="orientation"></v-radio>
+        <v-radio label="Vertical" value="vertical" v-model="orientation"></v-radio>
+        <v-radio label="Vertical reverse" value="vertical-reverse" v-model="orientation"></v-radio>
+      </v-radio-group>
       <br />
 
-      <h4>Darkmode</h4>
-      <input type="checkbox" id="horizontal" value="horizontal" v-model="darkmode" />
-      <label for="one">Darkmode</label>
+      <h4>Darkmode (manual toggle)</h4>
+      <div>Note: This overwrites the system settings</div>
+      <v-switch v-model="darkmode" label="Darkmode" class="flex-shrink-0"></v-switch>
       <br />
 
       <h4>Colors</h4>
-      <span>Light mode: </span>
-      <input type="text" v-model="lightColor">
-      <br />
-      <span>Dark mode: </span>
-      <input type="text" v-model="darkColor">
+      <div class="d-flex align-center">
+        <span>Generated colors:</span>
+        <div v-for="color in colors" :style="{ 'background-color': color }" class="pa-md-4 color-square"></div>
+      </div>
+      <div v-if="darkmode" class="d-flex flex-nowrap justify-space-evenly">
+        <div class="d-inline-block">
+          <span>Min color</span>
+          <v-color-picker v-model="minColorDark" :modes="['rgba']"></v-color-picker>
+        </div>
+        <div class="d-inline-block">
+          <span>Max color</span>
+          <v-color-picker v-model="maxColorDark" :modes="['rgba']"></v-color-picker>
+        </div>
+      </div>
 
-      <h4>Language</h4>
+      <div v-else class="d-flex flex-nowrap justify-space-evenly">
+
+
+        <div class="d-inline-block">
+          <span>Min color</span>
+          <v-color-picker v-model="minColorLight" :modes="['rgba']"></v-color-picker>
+        </div>
+        <div class="d-inline-block">
+          <span>Max color</span>
+          <v-color-picker v-model="maxColorLight" :modes="['rgba']"></v-color-picker>
+        </div>
+      </div>
+
+      <!-- TODO -->
+      <!-- <h4>Language</h4>
       <span>Select locale: </span>
       <select name="locale" id="locale">
         <option v-for="locale in locales" :key="locale[1]" :value="locale[1]">{{ `${locale[0]} - ${locale[1]}` }}
         </option>
       </select>
 
+      <div class="d-flex flex-nowrap justify-space-between align-center">
+        <v-switch label="Separated months" class="flex-shrink-0"></v-switch>
+        <v-text-field label="Value" class="flex-shrink-0"></v-text-field>
+        <v-select label="Unit" :items="['px', 'rem',]" class="flex-shrink-0"></v-select>
+      </div> -->
+    </v-card>
 
-    </div>
-    <h4>General Calendar</h4>
-    <calendar-heatmap
-      :values="values"
-      :dark-mode="darkmode"
-      :end-date="endDate"
-      :vertical="orientation === 'vertical'"
-      no-data-text="NOTHING"
-    />
-    <br/>
 
-    <h4>Separated months</h4>
-    <!-- <calendar-heatmap /> -->
-    <br/>
+    <v-card title="Variants">
 
-    <h4>Single line</h4>
-    <!-- <single-line /> -->
-    <br/>
-    <h4>Contributors</h4>
-    <!-- <contributors /> -->
-    <br/>
-    <h4>Contributions</h4>
-    <!-- <contributions /> -->
-    <br/>
+      <h4>Single line</h4>
+      TBD
+      <calendar-heatmap class="heatmap--disabled" :values="values" :dark-mode="darkmode" :end-date="endDate" disabled
+        :vertical="orientation === 'vertical'" no-data-text="NOTHING" />
+      <br />
+      <h4>Contributors</h4>
+      TBD
+      <calendar-heatmap class="heatmap--disabled" :values="values" :dark-mode="darkmode" :end-date="endDate"
+        :vertical="orientation === 'vertical'" no-data-text="NOTHING" />
+      <br />
+      <h4>Contributions</h4>
+      TBD
+      <calendar-heatmap class="heatmap--disabled" :values="values" :dark-mode="darkmode" :end-date="endDate"
+        :vertical="orientation === 'vertical'" no-data-text="NOTHING" />
+      <br />
+    </v-card>
 
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import GithubCalendarHeatmap from '@/components/CalendarHeatmap.vue';
 import CalendarHeatmap from '@/components/CalendarHeatmap.vue';
-import { data, locales, } from './data';
-import { Heatmap } from './components/Heatmap';
+import { data, locales, } from './heatmap/data';
+import { Heatmap } from './heatmap/heatmap';
 
 const values = ref(data);
 const endDate = ref(new Date());
-const picked = ref('contributions');
-const orientation = ref('horizontal');
-const hex = ref();
+const unit = ref('contributions');
+const orientation = ref('row');
+const minColorDark = ref(Heatmap.DEFAULT_RANGE_COLOR_DARK[0]);
+const maxColorDark = ref(Heatmap.DEFAULT_RANGE_COLOR_DARK[4]);
+const minColorLight = ref(Heatmap.DEFAULT_RANGE_COLOR_LIGHT[0]);
+const maxColorLight = ref(Heatmap.DEFAULT_RANGE_COLOR_LIGHT[4]);
 const darkmode = ref(false)
-const lightColor = ref(Heatmap.DEFAULT_RANGE_COLOR_LIGHT[4])
-const darkColor = ref(Heatmap.DEFAULT_RANGE_COLOR_DARK[4])
+const colors = ref(Heatmap.DEFAULT_RANGE_COLOR_LIGHT)
 
 const nav = ref(navigator)
 
@@ -95,22 +115,28 @@ onMounted(() => {
 })
 </script>
 
-<style>
+<style lang="scss">
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  font-size: 12px;
-  max-width: 60%;
-  margin: 0 auto;
-  border-left: 1px solid;
-  border-right: 1px solid;
-  padding: 1rem;
 }
 
-.main--dark {
-  background-color: #484f58;
-}
+// TODO Make this work
+// .heatmap {
+//   &--disabled {
+//     width: 100%;
+//     height: 100%;
+//     position: absolute;
+//     left: 0px;
+//     top: 0px;
+//     background-color: grey;
+//     opacity: .75
+//   }
+// }
 
-input {
-  margin: 0.5em;
+.color-square {
+  width: 2rem;
+  height: 2rem;
+  display: inline-block;
+  margin-right: 0.25rem;
 }
 </style>
