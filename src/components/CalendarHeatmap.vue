@@ -47,7 +47,7 @@
           </text>
         </g>
 
-        
+
 
         <!-- MAIN CALENDAR -->
         <g class="calendar__main__year" :transform="yearWrapperTransform">
@@ -58,8 +58,7 @@
                 :class="{ 'calendar__main__year__month__day--dark': darkMode }" v-if="day.date < now" :rx="radius"
                 :ry="radius" :transform="getDayPosition(dayIndex)" :width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
                 :height="SQUARE_SIZE - SQUARE_BORDER_SIZE" :style="{ fill: rangeColor[day.colorIndex] }"
-                @click="emitEvent(day)"
-              />
+                @click="emitEvent(day)" />
             </template>
           </g>
         </g>
@@ -88,9 +87,9 @@
             <svg v-if="!vertical" class="vch__external-legend-wrapper" :viewBox="legendViewbox"
               :height="SQUARE_SIZE - SQUARE_BORDER_SIZE">
               <g class="vch__legend__wrapper">
-                <rect v-for="(color, index) in rangeColor" :key="index" :rx="radius" :ry="radius"
-                  :style="{ fill: color }" :width="SQUARE_SIZE - SQUARE_BORDER_SIZE"
-                  :height="SQUARE_SIZE - SQUARE_BORDER_SIZE" :x="SQUARE_SIZE * index" />
+                <rect v-for="(color, index) in rangeColor" :key="index" :rx="radius" :ry="radius" :style="{ fill: color }"
+                  :width="SQUARE_SIZE - SQUARE_BORDER_SIZE" :height="SQUARE_SIZE - SQUARE_BORDER_SIZE"
+                  :x="SQUARE_SIZE * index" />
               </g>
             </svg>
           </slot>
@@ -108,13 +107,12 @@
 
 <script setup lang="ts">
 import { defineComponent, nextTick, onBeforeUnmount, onMounted, PropType, ref, toRef, toRefs, watch, computed, useSlots } from 'vue';
-import { Heatmap, } from '@/components/Heatmap';
-import type { CalendarItem, Locale, Month, TooltipFormatter, Value } from '../types';
-import Tooltip from '@/components/Tooltip.vue';
+import { Heatmap, } from '../heatmap/heatmap';
+import type { CalendarItem, Locale, Month, TooltipFormatter, Value } from '../heatmap/types';
 import { Ref } from 'vue';
-import Props from './props';
-import tippy from 'tippy.js';
-import 'tippy.js/dist/tippy.css';
+import Props from '../heatmap/props';
+// import tippy from 'tippy.js';
+// import 'tippy.js/dist/tippy.css';
 
 type Color = `#${string}`;
 
@@ -137,7 +135,7 @@ const SQUARE_BORDER_SIZE = Heatmap.SQUARE_SIZE / 5,
   daysLabelWrapperTransform = ref(''),
   monthsLabelWrapperTransform = ref('');
 
-const { values, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse, darkMode, radius, colors, darkColors, lightColors, } = toRefs(props);
+const { contributions, tooltipUnit, tooltipFormatter, noDataText, max, vertical, locale, legendDirectionReverse, darkMode, radius, colors, darkColors, lightColors, } = toRefs(props);
 
 const rangeColor = ref(Heatmap.DEFAULT_RANGE_COLOR_LIGHT) as Ref<Color[]>;
 
@@ -164,9 +162,9 @@ onMounted(() => {
     }
     return id;
   }
-  tippy(`#${createTooltip(new Date(2022, 0, 23))}`, {
-    content: 'My tooltip!',
-  });
+  // tippy(`#${createTooltip(new Date(2022, 0, 23))}`, {
+  //   content: 'My tooltip!',
+  // });
 })
 
 const slots = useSlots();
@@ -257,7 +255,7 @@ const lo = computed(() => {
 })
 
 const heatmap = computed(() => {
-  return new Heatmap(props.endDate, values.value, props.startDate, props.max)
+  return new Heatmap(props.endDate, contributions.value, props.startDate, props.max)
 })
 
 watch(vertical, (v) => {
@@ -284,7 +282,6 @@ const emitEvent = (day: any) => {
 const createId = (day: any) => {
   if (day?.alias) return day.alias;
   const id = `_${day.date.valueOf()}`;
-  console.log(id)
   return id;
 }
 
@@ -425,3 +422,4 @@ const createId = (day: any) => {
   display: inline;
 }
 </style>
+../heatmap/types../heatmap/props
