@@ -1,175 +1,344 @@
 import { PropType } from "vue";
 import { Heatmap } from "./heatmap";
 import type { Color, Locale, TooltipFormatter, Value } from "./types";
-import { isColor } from "../util/util";
+import { validateContributions, isColor , } from "./validate";
 
-type Orientation = 'row' | 'row-reverse' | 'column' | 'column-reverse';
+type Orientation = "row" | "column";
 
-interface Contribution {
+type DayOfWeek = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
+type ContributionUnit = {
+  repr: string;
+  hasPlural: boolean;
+  plural: string;
 };
 
+type TooltipMessageGenerator = (
+  noContributions?: number,
+  unit?: string,
+  dateAsString?: string
+) => string;
+
+interface Contribution {}
+
 export default {
-  // Calendar end date
-  // If not specified, first day from contributions, if no dates 1 year - today
+  /**
+   * Calendar's start date
+   * @values new Date(), new Date('2023-05-15');
+   * @type Date
+   * @example new Date()
+   * @default Default value is set by the following rule: contributions ? contributions[0].date : endDate.setFullYear(endDate.getFullYear() -1);
+   */
   startDate: {
     type: Date,
     default: null,
+    validate: (val: Date) => {
+      return !isNaN(val.getTime());
+    },
   },
-  // If not specified => last day from contribution, if no dates => today
+
+  /**
+   * Calendar's end date
+   * @values new Date(), new Date('2023-05-15');
+   * @type Date
+   * @example new Date()
+   * @default Default value is set by the following rule: contributions ? contributions[0].date : new Date();
+   */
   endDate: {
     type: Date,
     // required: true,
     default: new Date(),
   },
+
+  /**
+   * This specifies the number of contributions after which a date receives the maxColor.
+   * @values A number greater then or equal then 4.
+   * @type Number
+   * @default 99
+   */
   // Max number of events per date
   max: {
     type: Number,
-    default: 999,
+    default: 99,
+    validate: (val: number) => {
+      return val >= 4;
+    },
   },
-  // Main values
+
+  /**
+   * An object containing a series of object representing each day.
+   * This object is sorted by date field and every value outside of [startDate..endDate] range is dropped.
+   * See types/Contribution
+   * @type Contribution[]
+   * @default false
+   */
   contributions: {
     type: Array as PropType<Contribution[]>,
     default: [],
-    required: true
+    validate: (val: Contribution[]) => validateContributions(val),
   },
-  // Locale object, contains Months, Week, contribution template, no-contribution template, default is english
+
+  /**
+   * An object containing a series of Contribution object.
+   * This is prop should be used when adding new values after the heatmap is renderred.
+   * See types for documentation on Contribution structure
+   * @type Contribution[]
+   * @default false
+   */
+  newContriubitons: {
+    type: Array as PropType<Contribution[]>,
+    default: [],
+    validate: (val: Contribution[]) => validateContributions(val),
+  },
+
+  /**
+   * An object to specify a personalised locale, it can't overwrite the following values: names of day, names of months, heatmap less and more message
+   * See types/CalendarLocale
+   * @values CalendarLocale
+   * @default DEFAULT_LOCALE
+   */
   locale: {
     type: Object as PropType<Partial<Locale>>,
     default: null,
+    validate: (val: Object) => {
+      return typeof val === "object" && val !== null;
+    },
   },
+
+  /**
+   * A function to generate tooltip message, with the following arguments: unit: number, dateAsString: string
+   * @default TooltipMessageGenerator
+   * @default: (unit: number, dateAsString: string) => `${unit} contribution on ${dateAsString}`,
+   */
   // Tooltip template
-  // 
-  tooltip: {
-    type: [String, Boolean, Object as PropType<string>],
-    default: true
+  //
+  tooltipMessage: {
+    type: Function as PropType<TooltipMessageGenerator>,
+    default: (
+      noContributions: number,
+      unit: ContributionUnit,
+      dateAsString: string
+    ) =>
+      `${noContributions} ${unit.repr}${
+        noContributions > 1 && unit?.hasPlural ? unit?.plural : ""
+      }  on ${dateAsString}`,
+    validate: (fn: TooltipMessageGenerator) => {
+      try {
+        const resp = fn();
+        return typeof resp === "string";
+      } catch (error) {}
+      return false;
+    },
   },
+
+  /**
+   * Calendar's state is set to disabled i.e. reactivity is disabled and no events are emited
+   * @values Boolean
+   * @default false
+   */
   noContributionTooltip: {
-    type: [String, Function, String],
-    default: "No {unit} on {date}",
+    type: [String, Function as PropType<TooltipMessageGenerator>],
+    default: (
+      noContributions: number,
+      unit: ContributionUnit,
+      dateAsString: string
+    ) => `No ${unit.repr}${unit?.hasPlural ? unit?.plural : ""}  on ${dateAsString}`,
+    validate: (fnOrString: string | TooltipMessageGenerator) => {
+      if (fnOrString && typeof fnOrString === "string") {
+        return true;
+      } else {
+        try {
+          const resp = (fnOrString as () => string)();
+          return typeof resp === "string";
+        } catch (error) {}
+        return false;
+      }
+    },
   },
+
+  /**
+   * Represents the unit of a contribution. Must contain the repr property
+   * @values km, job
+   * @type ContributionUnit
+   * @default Heatmap.DEFAULT_TOOLTIP_UNIT
+   */
   tooltipUnit: {
-    type: String,
-    default: Heatmap.DEFAULT_TOOLTIP_UNIT
+    type: Object as PropType<ContributionUnit>,
+    default: Heatmap.DEFAULT_TOOLTIP_UNIT,
+    validate: (val: ContributionUnit) => {
+      return Object.prototype.hasOwnProperty.call(val, 'repr');
+    },
   },
-  // Custom text format for active/inactive days
-  tooltipFormatter: {
-    type: Function as PropType<TooltipFormatter>
-  },
-  // Calendar orientation
+
+  /**
+   * Calendar orientation
+   * @values row and column
+   * @type Orientation
+   * @default false
+   */
+  // Calendar 
   orientation: {
     type: String as PropType<Orientation>,
     default: false,
     validate: (or: Orientation) => {
-      return ['row', 'row-reverse', 'column', 'column-reverse'].includes(or); 
-    }
+      return ["row", "column"].includes(or);
+    },
   },
-  // Show no tooltip for empty dates
+
+  /**
+   * Show no tooltip for empty dates
+   * @values Boolean
+   * @default false
+   */
   showNoContributionTooltip: {
     type: Boolean,
     default: false,
   },
-  // Rounded corner for each date
-  // Takes ame values as border-radius html attribute
+
+  /**
+   * Specify the radius for a date
+   * @values Number >= 0
+   * @default 2
+   */
   radius: {
-    type: [String, Number,],
-    default: '2',
+    type: Number,
+    default: 2,
   },
+
+  /**
+   * Trigger dark mode manually. Uses dark mode styling.
+   * @values Boolean
+   * @default false
+   */
   darkMode: Boolean,
-  // default is right if horizontal, top if vertical
-  legendDirection: {
-    type: String as PropType<'left' | 'right'>,
-    default: 'right',
-  },
-  // No hover effect, no tooltip, no click event emit
-  noInteract: {
+
+  /**
+   * Reverse the direction of the legend. Default is right in horizontal mode, top in vertical mode.
+   * @values Boolean
+   * @default false
+   */
+  legendDirection: Boolean,
+
+  /**
+   * Calendar state is in interactive mode i.e. hover effects work and events are being emitted
+   * @values Boolean
+   * @default true
+   */
+  interactiveMode: {
     type: Boolean,
-    default: false,
+    default: true,
   },
-  monthWithYear: {
-    type: Boolean,
-    default: false,
-  },
-  // Not supported for partials
+
+  /**
+   * Leave a visual gap between each month
+   * @values A numerical value in px unit
+   * @default 0
+   */
   gapMonths: {
     type: Number,
     default: 0,
+    validate: (val: number) => {
+      return val > 0;
+    }
   },
-  // day, week, month
-  // Show one popup for the group
-  groupTooltip: {
-    type: String,
-    default: 'day',
+
+  /**
+   * Leave a visual gap between each week
+   * @values A numerical value in px unit
+   * @default 0
+   */
+  gapWeeks: {
+    type: Number,
+    default: 0,
+    validate: (val: number) => {
+      return val > 0;
+    }
   },
-  // Specify the default color object (5 values) with partial or complete object
-  // If not specified => interpolate from minColor..maxColor
+
+  /**
+   * Specify the color palette, 5 values. If not specified palette is generated by interpolating between minColor and maxColor
+   * @default Heatmap.DEFAULT_RANGE_COLOR_LIGHT
+   */
   colors: {
-    type: Array,
-    default: null,
+    type: Array as PropType<Color[]>,
+    default: Heatmap.DEFAULT_RANGE_COLOR_LIGHT,
     validate: (val: Color[]) => {
       if (!(val.length === 5)) {
         return false;
       }
       return true;
-    }
+    },
   },
-  // Specify the dark color object with partial or complete object
-  // Dark color can be triggered manually, by default it listenes to system
+
+  /**
+   * Specify the dark color palette, 5 values. If not specified palette is generated by interpolating between minColorDark and maxColorDark
+   * @default Heatmap.DEFAULT_RANGE_COLOR_DARK
+   */
   darkColors: {
-    type: Array,
-    default: null,
+    type: Array as PropType<Color[]>,
+    default: Heatmap.DEFAULT_RANGE_COLOR_DARK,
     validate: (val: Color[]) => {
       if (!(val.length === 5)) {
         return false;
       }
       return true;
-    }
+    },
   },
-  // Set max color
+
+  /**
+   * Set min color for light mode
+   */
   minColor: {
-    type: String,
-    default: null,
+    type: Object as PropType<Color>,
     validate: (val: Color) => {
       return isColor(val);
-    }
+    },
   },
-  // Set max color
+
+  /**
+   * Set max color for light mode
+   */
   maxColor: {
-    type: String,
-    default: null,
+    type: Object as PropType<Color>,
     validate: (val: Color) => {
       return isColor(val);
-    }
+    },
   },
-  // Set max color w/ dark mode
+
+  /**
+   * Set min color for dark mode
+   */
   minColorDark: {
-    type: String,
-    default: null,
+    type: Object as PropType<Color>,
     validate: (val: Color) => {
       return isColor(val);
-    }
+    },
   },
-  // Set max color w/ dark mode
+
+  /**
+   * Set max color for dark mode
+   */
   maxColorDark: {
-    type: String,
-    default: null,
+    type: Object as PropType<Color>,
     validate: (val: Color) => {
       return isColor(val);
-    }
+    },
   },
 
-  // px or rem
-  monthsGap: {
-
+  /**
+   * First day of the week
+   * Due to cultural and historical reasons in most calendars the start of the week is Saturday, Sunday or Monday.
+   * ISO 8601 standard specifies Monday as the first day of the week and is numbered as 1.
+   * @values A number between 1 and 7, 1 being Monday, 2 Tuesday, etc.
+   * @default 1
+   * @see See [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+   */
+  weekStart: {
+    type: Number,
+    default: 1,
+    validate: (val: DayOfWeek) => {
+      return val >= 1 && val <= 7;
+    },
   },
 
-  // px or rem
-  weeksGap: {
-
-  },
-
-  disabled: {
-    type: Boolean,
-    default: true,
-  }
-}
+};
