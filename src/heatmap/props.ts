@@ -1,25 +1,9 @@
 import { PropType } from "vue";
 import { Heatmap } from "./heatmap";
-import type { Color, Locale, TooltipFormatter, Value } from "./types";
-import { validateContributions, isColor , } from "./validate";
+import type { Color, Contribution, ContributionUnit, DayOfWeek, Locale, Orientation, TooltipFormatter, TooltipMessageGenerator, Value } from "./types";
+import { validateContributions, validateColor , } from "./validate";
+import { WEEK_FIRST_DAY } from "./defaults";
 
-type Orientation = "row" | "column";
-
-type DayOfWeek = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
-type ContributionUnit = {
-  repr: string;
-  hasPlural: boolean;
-  plural: string;
-};
-
-type TooltipMessageGenerator = (
-  noContributions?: number,
-  unit?: string,
-  dateAsString?: string
-) => string;
-
-interface Contribution {}
 
 export default {
   /**
@@ -79,19 +63,6 @@ export default {
   },
 
   /**
-   * An object containing a series of Contribution object.
-   * This is prop should be used when adding new values after the heatmap is renderred.
-   * See types for documentation on Contribution structure
-   * @type Contribution[]
-   * @default false
-   */
-  newContriubitons: {
-    type: Array as PropType<Contribution[]>,
-    default: [],
-    validate: (val: Contribution[]) => validateContributions(val),
-  },
-
-  /**
    * An object to specify a personalised locale, it can't overwrite the following values: names of day, names of months, heatmap less and more message
    * See types/CalendarLocale
    * @values CalendarLocale
@@ -142,7 +113,8 @@ export default {
       noContributions: number,
       unit: ContributionUnit,
       dateAsString: string
-    ) => `No ${unit.repr}${unit?.hasPlural ? unit?.plural : ""}  on ${dateAsString}`,
+    // ) => `No ${unit.repr}${unit?.hasPlural ? unit?.plural : ""}  on ${dateAsString}`,
+    ) => '',
     validate: (fnOrString: string | TooltipMessageGenerator) => {
       if (fnOrString && typeof fnOrString === "string") {
         return true;
@@ -291,7 +263,7 @@ export default {
   minColor: {
     type: Object as PropType<Color>,
     validate: (val: Color) => {
-      return isColor(val);
+      return validateColor(val);
     },
   },
 
@@ -301,7 +273,7 @@ export default {
   maxColor: {
     type: Object as PropType<Color>,
     validate: (val: Color) => {
-      return isColor(val);
+      return validateColor(val);
     },
   },
 
@@ -311,7 +283,7 @@ export default {
   minColorDark: {
     type: Object as PropType<Color>,
     validate: (val: Color) => {
-      return isColor(val);
+      return validateColor(val);
     },
   },
 
@@ -321,7 +293,7 @@ export default {
   maxColorDark: {
     type: Object as PropType<Color>,
     validate: (val: Color) => {
-      return isColor(val);
+      return validateColor(val);
     },
   },
 
@@ -335,7 +307,7 @@ export default {
    */
   weekStart: {
     type: Number,
-    default: 1,
+    default: WEEK_FIRST_DAY,
     validate: (val: DayOfWeek) => {
       return val >= 1 && val <= 7;
     },

@@ -35,7 +35,7 @@ export interface CalendarItem {
 	colorIndex: number;
 }
 
-export type Calendar = CalendarItem[][];
+export type Calendar = CalendarItem[];
 
 export interface Month {
 	value: number;
@@ -45,10 +45,30 @@ export interface Month {
 export interface Locale {
 	months: string[];
 	days: string[];
-	on: string;
 	less: string;
 	more: string;
 }
 
 export type TooltipFormatter = (item: CalendarItem, unit: string, active: boolean) => string;
+
+export type Orientation = "row" | "column";
+
+export type DayOfWeek = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+export type ContributionUnit = {
+  repr: string;
+  hasPlural: boolean;
+  plural: string;
+};
+
+export type TooltipMessageGenerator = (
+  noContributions?: number,
+  unit?: string,
+  dateAsString?: string
+) => string;
+
+export interface Contribution {
+  date: Date,
+  count: number,
+}
 
