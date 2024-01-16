@@ -1,8 +1,6 @@
 import { Color, Locale } from "./types";
 
-
-
-const DEFAULT_RANGE_COLOR_LIGHT: Color[] = [
+const RANGE_COLOR_LIGHT: Color[] = [
   "#ebedf0",
   "#39d353",
   "#26a641",
@@ -10,7 +8,7 @@ const DEFAULT_RANGE_COLOR_LIGHT: Color[] = [
   "#0e4429",
 ];
 
-const DEFAULT_RANGE_COLOR_DARK: Color[] = [
+const RANGE_COLOR_DARK: Color[] = [
   "#161b22",
   "#39d353",
   "#26a641",
@@ -20,7 +18,7 @@ const DEFAULT_RANGE_COLOR_DARK: Color[] = [
 
 // Default locale en-US
 // static readonly DEFAULT_LOCALE = 'en-US';
-const DEFAULT_LOCALE: Locale = {
+const LOCALE: Locale = {
   months: [
     "Jan",
     "Feb",
@@ -40,7 +38,7 @@ const DEFAULT_LOCALE: Locale = {
   more: "More",
 };
 
-const DEFAULT_TOOLTIP_UNIT = {
+const TOOLTIP_UNIT = {
   repr: "contribution",
   hasPlural: true,
   plural: "s",
@@ -50,13 +48,19 @@ const DEFAULT_TOOLTIP_UNIT = {
 const DAYS_IN_ONE_YEAR = 365;
 const WEEK_FIRST_DAY = 1;
 const SQUARE_SIZE = 11;
+const MAX = 1;
+const WEEKS_GAP = 20//px;
+const MONTHS_GAP = 20//px;
 
 export {
-  DEFAULT_RANGE_COLOR_LIGHT,
-  DEFAULT_RANGE_COLOR_DARK,
-  DEFAULT_LOCALE,
-  DEFAULT_TOOLTIP_UNIT,
+  RANGE_COLOR_LIGHT,
+  RANGE_COLOR_DARK,
+  LOCALE,
+  TOOLTIP_UNIT,
   DAYS_IN_ONE_YEAR,
   WEEK_FIRST_DAY,
   SQUARE_SIZE, 
+  MAX,
+  WEEKS_GAP,
+  MONTHS_GAP,
 }
