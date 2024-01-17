@@ -326,6 +326,10 @@ import Props from "../heatmap/props";
 import { Heatmap } from "../heatmap/heatmap";
 import { LOCALE, RANGE_COLOR_LIGHT, SQUARE_SIZE } from "../heatmap/defaults";
 
+/**
+ * Calendar Heatmap
+ * @displayName CalendarHeatmap
+ */
 export default defineComponent(
   (props) => {
     // use Composition API here like in <script setup>

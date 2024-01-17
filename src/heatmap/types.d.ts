@@ -72,3 +72,6 @@ export interface Contribution {
   count: number,
 }
 
+export interface Style {
+  colorPalette: Color[],
+}

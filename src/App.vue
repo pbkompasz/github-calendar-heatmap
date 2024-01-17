@@ -1,8 +1,9 @@
 <template>
   <div class="pa-md-4">
     <h1>Playground</h1>
-    <calendar-heatmap :values="values" :dark-mode="darkmode" :end-date="endDate" :vertical="orientation === 'vertical'"
-      no-data-text="NOTHING" />
+    <calendar-heatmap style="max-width: 700px;" />
+
+    <div ref="heatmapRef"></div>
 
     <v-card title="Settings" class="pa-md-4 mt-md-8">
       <h4>Unit Select</h4>
@@ -28,6 +29,8 @@
         <span>Generated colors:</span>
         <div v-for="color in colors" :style="{ 'background-color': color }" class="pa-md-4 color-square"></div>
       </div>
+      Pick min and max color and interpolate the rest
+      OR specify each color
       <div v-if="darkmode" class="d-flex flex-nowrap justify-space-evenly">
         <div class="d-inline-block">
           <span>Min color</span>
@@ -72,7 +75,7 @@
 
       <h4>Single line</h4>
       TBD
-      <calendar-heatmap class="heatmap--disabled" :values="values" :dark-mode="darkmode" :end-date="endDate" disabled
+      <!-- <calendar-heatmap class="heatmap--disabled" :values="values" :dark-mode="darkmode" :end-date="endDate" disabled
         :vertical="orientation === 'vertical'" no-data-text="NOTHING" />
       <br />
       <h4>Contributors</h4>
@@ -84,7 +87,7 @@
       TBD
       <calendar-heatmap class="heatmap--disabled" :values="values" :dark-mode="darkmode" :end-date="endDate"
         :vertical="orientation === 'vertical'" no-data-text="NOTHING" />
-      <br />
+      <br /> -->
     </v-card>
 
   </div>
@@ -92,27 +95,30 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import CalendarHeatmap from '@/components/CalendarHeatmap.vue';
+import CalendarHeatmap from './components/CalendarHeatmap';
 import { data, locales, } from './heatmap/data';
 import { Heatmap } from './heatmap/heatmap';
+import { LOCALE, RANGE_COLOR_DARK, RANGE_COLOR_LIGHT } from './heatmap/defaults';
 
 const values = ref(data);
-const endDate = ref(new Date());
+const endDate = ref(new Date('2024-1-1'));
+const startDate = ref(new Date('2024-12-31'));
 const unit = ref('contributions');
 const orientation = ref('row');
-const minColorDark = ref(Heatmap.DEFAULT_RANGE_COLOR_DARK[0]);
-const maxColorDark = ref(Heatmap.DEFAULT_RANGE_COLOR_DARK[4]);
-const minColorLight = ref(Heatmap.DEFAULT_RANGE_COLOR_LIGHT[0]);
-const maxColorLight = ref(Heatmap.DEFAULT_RANGE_COLOR_LIGHT[4]);
+const minColorDark = ref(RANGE_COLOR_DARK[0]);
+const maxColorDark = ref(RANGE_COLOR_DARK[4]);
+const minColorLight = ref(RANGE_COLOR_LIGHT[0]);
+const maxColorLight = ref(RANGE_COLOR_LIGHT[4]);
 const darkmode = ref(false)
-const colors = ref(Heatmap.DEFAULT_RANGE_COLOR_LIGHT)
+const colors = ref(RANGE_COLOR_LIGHT)
+const heatmapRef = ref();
 
 const nav = ref(navigator)
 
 const button = ref(null)
-onMounted(() => {
 
-})
+console.log(CalendarHeatmap)
+
 </script>
 
 <style lang="scss">
@@ -139,4 +145,15 @@ body {
   display: inline-block;
   margin-right: 0.25rem;
 }
+
+
+::-webkit-scrollbar {
+  height: 7px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: grey;
+}
 </style>
+<!-- TODO Move cursor to component -->
