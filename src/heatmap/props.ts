@@ -162,7 +162,7 @@ export default {
   // Calendar
   orientation: {
     type: String as PropType<Orientation>,
-    default: false,
+    default: 'row',
     validate: (or: Orientation) => {
       return ["row", "column"].includes(or);
     },
@@ -329,14 +329,14 @@ export default {
    * @default true
    * @see See [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
    */
-  hideWeeks: Boolean,
+  hideDaysText: Boolean,
 
   /**
    * Show weeks
    * @default true
    * @see See [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
    */
-  hideMonths: Boolean,
+  hideMonthsText: Boolean,
 
   /**
    * Show weeks

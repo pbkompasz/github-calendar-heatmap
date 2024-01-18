@@ -47,10 +47,11 @@ const TOOLTIP_UNIT = {
 // TODO Leap years
 const DAYS_IN_ONE_YEAR = 365;
 const WEEK_FIRST_DAY = 1;
-const SQUARE_SIZE = 11;
+const SQUARE_SIZE = 11//px;
+const SQUARE_MARGIN = 1//px;
 const MAX = 1;
-const WEEKS_GAP = 20//px;
-const MONTHS_GAP = 20//px;
+const DAYS_TEXT_GAP = 30//px;
+const MONTHS_TEXT_GAP = 20//px;
 
 export {
   RANGE_COLOR_LIGHT,
@@ -60,7 +61,8 @@ export {
   DAYS_IN_ONE_YEAR,
   WEEK_FIRST_DAY,
   SQUARE_SIZE, 
+  SQUARE_MARGIN,
   MAX,
-  WEEKS_GAP,
-  MONTHS_GAP,
+  DAYS_TEXT_GAP,
+  MONTHS_TEXT_GAP,
 }
