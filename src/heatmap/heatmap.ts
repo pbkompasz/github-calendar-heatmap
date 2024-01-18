@@ -6,8 +6,9 @@ import {
   RANGE_COLOR_DARK,
   SQUARE_SIZE,
   WEEK_FIRST_DAY,
-  WEEKS_GAP,
-  MONTHS_GAP,
+  DAYS_TEXT_GAP,
+  MONTHS_TEXT_GAP,
+  SQUARE_MARGIN,
 } from "./defaults";
 import type {
   Activities,
@@ -30,6 +31,9 @@ export class Heatmap {
   colorPalette: Color[];
   weekStartDay: DayOfWeek;
   darkmode: boolean;
+  hideDaysText: boolean;
+  hideMonthsText: boolean;
+  hideRange: boolean;
 
   private _contributions: Contribution[];
   private _firstFullWeekOfMonths?: Month[];
@@ -44,7 +48,10 @@ export class Heatmap {
     locale: Locale = LOCALE,
     darkmode: boolean,
     colorPalette: Color[],
-    weekStartDay: DayOfWeek = WEEK_FIRST_DAY
+    weekStartDay: DayOfWeek = WEEK_FIRST_DAY,
+    hideDaysText: boolean = false,
+    hideMonthsText: boolean = false,
+    hideRange: boolean = false
   ) {
     // contributions.sort((c1: Contribution, c2: Contribution) => {
     //   return +new Date(c1.date) - +new Date(c2.date);
@@ -60,6 +67,9 @@ export class Heatmap {
       colorPalette ?? darkmode ? RANGE_COLOR_LIGHT : RANGE_COLOR_DARK;
     this.weekStartDay = weekStartDay;
     this.darkmode = darkmode;
+    this.hideDaysText = hideDaysText;
+    this.hideMonthsText = hideMonthsText;
+    this.hideRange = hideRange;
   }
 
   set contributions(c: Contribution) {
@@ -79,58 +89,116 @@ export class Heatmap {
   }
 
   public static createCalendarDescriptor(heatmap: Heatmap) {
-    const { startDate, endDate, weekStartDay } = heatmap;
+    const { startDate, endDate, weekStartDay, hideDaysText, hideMonthsText } =
+      heatmap;
     const calendar = [];
 
+    const actualDaysTextGap = hideDaysText ? 0 : DAYS_TEXT_GAP;
+    const actualMonthsTextGap = hideMonthsText ? 0 : MONTHS_TEXT_GAP;
+
+    let heatmapWidth = actualDaysTextGap;
+    let heatmapHeight = actualMonthsTextGap + 7 * (SQUARE_SIZE + SQUARE_MARGIN);
+
     // First "maybe" partial week
-    let numberInWeek = new Date(startDate).getDay() - 1;
-    console.log(new Date(startDate));
-    console.log(new Date(endDate));
+    let numberInWeek = new Date(startDate).getDay() - 1 + (weekStartDay % 7 - 1);
     for (let i = numberInWeek; i <= 6; i++) {
       // TODO 1 is margin
-      calendar.push([WEEKS_GAP, MONTHS_GAP + i * (SQUARE_SIZE + 1)]);
+      calendar.push([
+        actualDaysTextGap,
+        actualMonthsTextGap + i * (SQUARE_SIZE + 1),
+      ]);
     }
+    heatmapWidth += SQUARE_SIZE + SQUARE_MARGIN;
 
     // Full weeks between
     const oneDay = 24 * 60 * 60 * 1000;
     const timestamp1 = startDate.getTime();
     const timestamp2 = endDate.getTime();
     const days = Math.round(Math.abs((timestamp1 - timestamp2) / oneDay));
-    const weeksInBetween = Math.round(days / 7);
+    const weeksInBetween = Math.round(days / 7) - 1;
     for (let i = 1; i <= weeksInBetween; i++) {
       for (let j = 0; j <= 6; j++) {
         calendar.push([
-          WEEKS_GAP + i * (SQUARE_SIZE + 1),
-          MONTHS_GAP + j * (SQUARE_SIZE + 1),
+          actualDaysTextGap + i * (SQUARE_SIZE + 1),
+          actualMonthsTextGap + j * (SQUARE_SIZE + 1),
         ]);
       }
     }
+    heatmapWidth += weeksInBetween * (SQUARE_SIZE + SQUARE_MARGIN);
 
     // Last "maybe" partial week
     // TODO Add startOfTheWeek
     numberInWeek = endDate.getDay() + 1;
-    console.log(numberInWeek);
     for (let i = 0; i <= numberInWeek; i++) {
       // TODO 1 is margin
       calendar.push([
-        WEEKS_GAP + (weeksInBetween + 1) * (SQUARE_SIZE + 1),
-        MONTHS_GAP + i * (SQUARE_SIZE + 1),
+        actualDaysTextGap + (weeksInBetween + 1) * (SQUARE_SIZE + 1),
+        actualMonthsTextGap + i * (SQUARE_SIZE + 1),
       ]);
     }
+    heatmapWidth += SQUARE_SIZE + SQUARE_MARGIN;
 
-    return calendar;
+    let daysTexts = [
+      [
+        0,
+        actualMonthsTextGap +
+          new Date(startDate).getDay() * (SQUARE_SIZE + SQUARE_MARGIN),
+        "Mon",
+      ],
+      [
+        0,
+        actualMonthsTextGap +
+          (new Date(startDate).getDay() + 2) * (SQUARE_SIZE + SQUARE_MARGIN),
+        "Wed",
+      ],
+      [
+        0,
+        actualMonthsTextGap +
+          (new Date(startDate).getDay() + 4) * (SQUARE_SIZE + SQUARE_MARGIN),
+        "Fri",
+      ],
+    ];
+    const months = [
+      { name: 'Jan', weeks: 0 },
+      { name: "Feb", weeks: 5 },
+      { name: "Mar", weeks: 9 },
+      { name: "Apr", weeks: 14 },
+      { name: "May", weeks: 18 },
+      { name: "Jun", weeks: 23 },
+      { name: "Jul", weeks: 27 },
+      { name: "Aug", weeks: 31 },
+      { name: "Sep", weeks: 36 },
+      { name: "Oct", weeks: 40 },
+      { name: "Nov", weeks: 44 },
+      { name: "Dec", weeks: 49 },
+    ];
+    const monthsTexts = months.map(month => [
+      actualDaysTextGap + month.weeks * (SQUARE_SIZE + SQUARE_MARGIN),
+      actualMonthsTextGap - 2,
+      month.name,
+    ]);
+
+    return {
+      calendar,
+      heatmapWidth,
+      heatmapHeight,
+      daysTexts,
+      monthsTexts,
+    };
   }
 
   // NOTE svgContgainer
   public static createCalendarHTML(
-    calendar: number[][],
+    obj: { calendar: number[][]; heatmapWidth: number; heatmapHeight: number, daysTexts: [][], monthsTexts: [][], },
     style: Style,
     containerWidth: number | string = "100%",
-    containerHeight: number | string = "100%",
-    heatmapWidth: number | string = "700px",
-    heatmapHeight: number | string = "150px"
+    containerHeight: number | string = "100%"
   ) {
     const rectangles = [];
+    const texts = [];
+
+    const { calendar, heatmapHeight, heatmapWidth, daysTexts, monthsTexts } =
+      obj;
 
     for (let r of calendar) {
       const rect = h("rect", {
@@ -143,10 +211,26 @@ export class Heatmap {
           margin: "1px",
         },
         onMouseover() {
-          console.log(`[${r[0]}] [${r[1]}]`)
-        }
+          console.log(`${((r[0] - 30) / 12) * 7 + (r[1] - 20) / 12}`);
+        },
       });
       rectangles.push(rect);
+    }
+
+    for (let t of daysTexts.concat(monthsTexts)) {
+      const text = h("text", {
+        // @ts-ignore
+        x: String(t[0]),
+        // @ts-ignore
+        y: String(t[1]),
+        // @ts-ignore
+        innerHTML: t[2],
+        style: {
+          fontSize: "12px",
+          fontWeight: "400",
+        },
+      });
+      texts.push(text);
     }
 
     const svg = h(
@@ -157,7 +241,7 @@ export class Heatmap {
           height: heatmapHeight,
         },
       },
-      rectangles
+      [rectangles, texts]
     );
 
     const svgContainer = h(
@@ -165,7 +249,7 @@ export class Heatmap {
       {
         style: {
           overflowX: "scroll",
-          width: '100%',
+          width: "100%",
         },
       },
       [svg]
@@ -177,7 +261,7 @@ export class Heatmap {
         style: {
           width: "100%",
           height: "50px",
-          border: '1px solid'
+          border: "1px solid",
         },
       },
       "Bottom shit"
