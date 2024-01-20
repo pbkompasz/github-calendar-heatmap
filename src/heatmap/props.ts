@@ -43,7 +43,6 @@ export default {
    */
   endDate: {
     type: Date,
-    required: false,
     default: new Date(),
   },
 
